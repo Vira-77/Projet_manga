@@ -18,7 +18,7 @@ app.use(express.json());
 // ==========================
 //   Connexion à MongoDB
 // ==========================
-mongoose.connect(process.env.MONGO_URL)
+mongoose.connect(process.env.MONGO_URI)
 .then(() => console.log("Connecté à MongoDB"))
 .catch(err => console.error("Erreur de connexion MongoDB :", err));
 
@@ -36,13 +36,15 @@ const mangaRoutes = require('./routes/mangaRoutes');
 const chapterRoutes = require('./routes/chapterRoutes');
 const genreRoutes = require('./routes/genreRoutes');
 const storeRoutes = require('./routes/storeRoutes'); 
-
+const aiRoutes = require('./routes/aiRoutes');
 
 app.use('/users', userRoutes);
 app.use('/mangas', mangaRoutes);
 app.use('/chapters', chapterRoutes);
 app.use('/genres', genreRoutes);
 app.use('/stores', storeRoutes);
+app.use("/ai", aiRoutes);
+
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
