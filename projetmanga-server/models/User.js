@@ -2,32 +2,35 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
 const UserSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  email: { type: String, unique: true, required: true },
-  password: { type: String, required: true },
-  phone: String,
-  address: String,
+    name: { type: String, required: true, trim: true },
+    email: { type: String, unique: true, required: true, trim: true },
+    password: { type: String, required: true },
+    phone: String,
+    address: String,
 
-  // Rôle de l'utilisateur : Utilisateur,admin_manga,admin
-  role: {
-    type: String,
-    enum: ['utilisateur', 'admin_manga', 'admin'],
-    default: 'utilisateur'
-  },
-
-  // Champ pour la géolocalisation
-  position: {
-    type: {
-      type: String,
-      enum: ['Point'],
-      default: 'Point'
+    role: {
+        type: String,
+        enum: ['utilisateur', 'admin_manga', 'admin'],
+        default: 'utilisateur'
     },
-    coordinates: {
-      type: [Number], 
-      required: false 
-    }
-  }
 
+    // champ pour la géolocalisation
+    position: {
+        type: {
+            type: String,
+            enum: ['Point'],
+            default: 'Point'
+        },
+        coordinates: {
+            type: [Number],
+            required: false
+        }
+    },
+
+    // Favoris du user
+    favorites: [
+        { type: mongoose.Schema.Types.ObjectId, ref: 'Manga' }
+    ],
 }, {
   toJSON: {
     // Supprime le mot de passe des réponses JSON
@@ -38,18 +41,19 @@ const UserSchema = new mongoose.Schema({
   }
 });
 
+    // Pour savoir si Android a synchronisé les données locales
+    jikanSync: { type: Boolean, default: false },
+
+}, { timestamps: true });
 
 // Hachage du mot de passe avant enregistrement
 UserSchema.pre('save', async function () {
-  if (!this.isModified('password')) return ;
-    const saltRounds = 10;
-    const hash = await bcrypt.hash(this.password, saltRounds);
-    this.password = hash;
+    if (!this.isModified('password')) return;
+    this.password = await bcrypt.hash(this.password, 10);
 });
 
-// Comparer un mot de passe en clair avec le haché
-UserSchema.methods.comparePassword = function (candidate) {
-  return bcrypt.compare(candidate, this.password);
+UserSchema.methods.comparePassword = function (plaintext) {
+    return bcrypt.compare(plaintext, this.password);
 };
 
 

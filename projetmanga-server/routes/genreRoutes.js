@@ -12,12 +12,11 @@ const { verifyToken, authorizeRoles } = require('../middlewares/authMiddleware')
 // Récupérer tous les genres
 router.get('/', genreController.getAllGenres);
 
-// Récupérer un genre par ID
-router.get('/:id', genreController.getGenreById);
-
 // Récupérer un genre par nom
 router.get('/name/:name', genreController.getGenreByName);
 
+// Récupérer un genre par ID
+router.get('/:id', genreController.getGenreById);
 
 // ==========================
 //   ROUTES PROTÉGÉES - ADMIN SEULEMENT

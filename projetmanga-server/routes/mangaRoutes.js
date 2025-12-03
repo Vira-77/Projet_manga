@@ -14,9 +14,6 @@ const { verifyToken, authorizeRoles } = require('../middlewares/authMiddleware')
 // Récupérer tous les mangas
 router.get('/', mangaController.getAllMangas);
 
-// Récupérer un manga par ID
-router.get('/:id', mangaController.getMangaById);
-
 // Récupérer un manga par nom
 router.get('/name/:name', mangaController.getMangaByName);
 
@@ -25,6 +22,9 @@ router.get('/genre/:genreId', mangaController.getMangasByGenre);
 
 // Récupérer les mangas d'un auteur
 router.get('/author/:author', mangaController.getMangasByAuthor);
+
+// Récupérer un manga par ID
+router.get('/:id', mangaController.getMangaById);
 
 // ==========================
 //   ROUTES PROTÉGÉES - ADMIN MANGA ET ADMIN
@@ -46,11 +46,19 @@ router.put(
     mangaController.updateManga
 );
 
+// Supprimer un manga via POST (pour contourner les soucis de DELETE côté client)
+router.post('/:id/delete',
+    verifyToken,
+    authorizeRoles('admin', 'admin_manga'),
+    mangaController.deleteManga
+);
+
+
 // Supprimer un manga par ID
 router.delete(
     '/:id', 
     verifyToken, 
-    authorizeRoles('admin'), 
+    authorizeRoles('admin', 'admin_manga'),
     mangaController.deleteManga
 );
 

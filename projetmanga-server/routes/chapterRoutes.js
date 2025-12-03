@@ -12,12 +12,11 @@ const { verifyToken, authorizeRoles } = require('../middlewares/authMiddleware')
 // Récupérer tous les chapitres
 router.get('/', chapterController.getAllChapters);
 
-// Récupérer un chapitre par ID (avec pages par défaut)
-router.get('/:id', chapterController.getChapterById);
-
 // Récupérer les chapitres d'un manga
 router.get('/manga/:mangaId', chapterController.getChaptersByManga);
 
+// Récupérer un chapitre par ID (avec pages par défaut)
+router.get('/:id', chapterController.getChapterById);
 
 // ==========================
 //   ROUTES PROTÉGÉES - ADMIN MANGA ET ADMIN

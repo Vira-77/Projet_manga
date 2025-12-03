@@ -17,7 +17,7 @@ exports.registerUser = async (name, email, password, role) => {
   }
 
   // Création du nouvel utilisateur 
-  const user = new User({ name, email, password, role });
+  const user = new User({ name, email, password, role: 'utilisateur' });
   await user.save();
   
   return user;

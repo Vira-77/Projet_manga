@@ -16,8 +16,7 @@ exports.register = async (req, res) => {
       user: {
         id: newUser._id,
         name: newUser.name,
-        email: newUser.email,
-        role: newUser.role
+        email: newUser.email
       }
     });
 

@@ -2,9 +2,9 @@
 //   Import des dépendances
 // ==========================
 const express = require('express');
-const http = require('http');
 const mongoose = require('mongoose');
 require('dotenv').config();
+
 
 
 // ==========================
@@ -28,29 +28,26 @@ connectDB();
 //const { verifyToken, authorizeRoles } = require('./middlewares/authMiddleware');
 
 const authRouter = require('./routes/auth'); // Routes d'authentification
+app.use('/auth', authRouter);
+
 const userRoutes = require('./routes/userRoutes');
 const mangaRoutes = require('./routes/mangaRoutes');
 const chapterRoutes = require('./routes/chapterRoutes');
 const genreRoutes = require('./routes/genreRoutes');
 const storeRoutes = require('./routes/storeRoutes');
+const externalRoutes = require('./routes/externalRoutes');
+const favoriteRoutes = require('./routes/favoriteRoutes');
 
-app.use('/auth', authRouter);
+
 app.use('/users', userRoutes);
 app.use('/mangas', mangaRoutes);
 app.use('/chapters', chapterRoutes);
 app.use('/genres', genreRoutes);
 app.use('/stores', storeRoutes);
-
-
-const { initSocket } = require('./websocket/socket');
+app.use('/external', externalRoutes);
+app.use('/favorites', favoriteRoutes);
 
 const PORT = process.env.PORT || 3000;
-const server = http.createServer(app);
-
-// Initialisation de Socket.io avec rooms
-initSocket(server);
-
-server.listen(PORT, () => {
+app.listen(PORT, () => {
   console.log(`Serveur Manga en ligne sur http://localhost:${PORT}`);
 });
-
