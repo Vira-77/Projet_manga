@@ -2,6 +2,7 @@
 //   Import des dépendances
 // ==========================
 const express = require('express');
+const http = require('http');
 const mongoose = require('mongoose');
 require('dotenv').config();
 
@@ -47,7 +48,17 @@ app.use('/stores', storeRoutes);
 app.use('/external', externalRoutes);
 app.use('/favorites', favoriteRoutes);
 
+// ==========================
+//   Socket.io & serveur HTTP
+// ==========================
+const { initSocket } = require('./websocket/socket');
+
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+const server = http.createServer(app);
+
+// Initialisation de Socket.io avec rooms
+initSocket(server);
+
+server.listen(PORT, () => {
   console.log(`Serveur Manga en ligne sur http://localhost:${PORT}`);
 });

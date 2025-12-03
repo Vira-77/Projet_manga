@@ -31,7 +31,12 @@ const UserSchema = new mongoose.Schema({
     favorites: [
         { type: mongoose.Schema.Types.ObjectId, ref: 'Manga' }
     ],
+
+    // Pour savoir si Android a synchronisé les données locales
+    jikanSync: { type: Boolean, default: false },
+
 }, {
+  timestamps: true,
   toJSON: {
     // Supprime le mot de passe des réponses JSON
     transform(doc, ret) {
@@ -40,11 +45,6 @@ const UserSchema = new mongoose.Schema({
     }
   }
 });
-
-    // Pour savoir si Android a synchronisé les données locales
-    jikanSync: { type: Boolean, default: false },
-
-}, { timestamps: true });
 
 // Hachage du mot de passe avant enregistrement
 UserSchema.pre('save', async function () {

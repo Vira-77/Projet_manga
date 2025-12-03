@@ -13,7 +13,7 @@ const ChapterSchema = new mongoose.Schema({
     pages: [PageSchema],
 
     chapterNumber: { type: Number, default: null },
-    jikanChapterId: { type: Number, default: null }
+    jikanChapterId: { type: Number, default: null },
 
 }, { timestamps: true });
 

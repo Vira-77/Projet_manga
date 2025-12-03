@@ -86,7 +86,6 @@ async function addSampleData() {
 
         const seinen = await Genre.create({
             name: 'Seinen',
-            description: 'Manga destiné aux jeunes adultes hommes'
             description: 'Mangas pour jeunes adultes, souvent plus sombres et complexes.'
         });
 

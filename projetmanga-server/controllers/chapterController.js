@@ -1,4 +1,5 @@
 const chapterService = require('../services/chapterService');
+const { notifyNewChapter, notifyChapterUpdated } = require('../websocket/notifications');
 
 // ==========================
 //   CRÉATION D'UN CHAPITRE
@@ -6,6 +7,12 @@ const chapterService = require('../services/chapterService');
 exports.createChapter = async (req, res) => {
     try {
         const newChapter = await chapterService.createChapter(req.body);
+
+        // Notification temps réel pour les clients abonnés à ce manga
+        if (newChapter && newChapter.manga) {
+            const mangaId = newChapter.manga._id || newChapter.manga;
+            notifyNewChapter(mangaId, newChapter);
+        }
         
         res.status(201).json({
             message: 'Chapitre créé avec succès',
@@ -139,6 +146,12 @@ exports.updateChapter = async (req, res) => {
     try {
         const { id } = req.params;
         const updatedChapter = await chapterService.updateChapter(id, req.body);
+
+        // Notification temps réel pour les clients abonnés à ce manga
+        if (updatedChapter && updatedChapter.manga) {
+            const mangaId = updatedChapter.manga._id || updatedChapter.manga;
+            notifyChapterUpdated(mangaId, updatedChapter);
+        }
         
         res.status(200).json({
             message: 'Chapitre mis à jour avec succès',
