@@ -136,3 +136,13 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+
+
+projetmanga-client-android/.DS_Store
+projetmanga-client-android/build
+projetmanga-client-android/captures
+
+projetmanga-client-android/.externalNativeBuild
+projetmanga-client-android/.gradle
+projetmanga-client-android/local.properties
