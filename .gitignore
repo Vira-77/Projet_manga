@@ -133,3 +133,10 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# IDE - IntelliJ IDEA / WebStorm
+.idea/
+
+# Environment variables (garder .env mais ignorer les variantes)
+.env.local
+.env.*.local
