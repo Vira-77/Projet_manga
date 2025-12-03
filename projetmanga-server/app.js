@@ -4,7 +4,8 @@
 const express = require('express');
 const http = require('http');
 const mongoose = require('mongoose');
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
 
 
