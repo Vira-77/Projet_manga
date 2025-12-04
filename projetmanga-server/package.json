@@ -19,6 +19,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^9.0.0",
     "nodemon": "^3.1.11",
+    "openai": "^6.9.1",
     "router": "^2.2.0"
   },
   "devDependencies": {

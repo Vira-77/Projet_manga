@@ -39,7 +39,7 @@ const genreRoutes = require('./routes/genreRoutes');
 const storeRoutes = require('./routes/storeRoutes');
 const externalRoutes = require('./routes/externalRoutes');
 const favoriteRoutes = require('./routes/favoriteRoutes');
-
+const aiRoutes = require('./routes/aiRoutes');
 
 app.use('/users', userRoutes);
 app.use('/mangas', mangaRoutes);
@@ -48,11 +48,13 @@ app.use('/genres', genreRoutes);
 app.use('/stores', storeRoutes);
 app.use('/external', externalRoutes);
 app.use('/favorites', favoriteRoutes);
-
+app.use("/ai", aiRoutes);
 // ==========================
 //   Socket.io & serveur HTTP
 // ==========================
 const { initSocket } = require('./websocket/socket');
+
+
 
 const PORT = process.env.PORT || 3000;
 const server = http.createServer(app);
