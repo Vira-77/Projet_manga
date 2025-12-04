@@ -26,6 +26,7 @@ services:
       - MONGO_URI=mongodb://mongo:27017/manga_bdd
       - JWT_SECRET=superSecretMangaKey
       - JWT_EXPIRES=1h
+      - NODE_ENV=development
     ports:
       - "3000:3000"
 

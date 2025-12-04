@@ -1,13 +1,12 @@
 const mongoose = require('mongoose');
 const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, '..', '..', '.env') });
 
 const User = require('../models/User');
 const Genre = require('../models/Genre');
 const Manga = require('../models/Manga');
 const Store = require('../models/Store');
 
-let db_uri = process.env.MONGO_URL;
+let db_uri = process.env.MONGO_URI;
 
 if (db_uri && db_uri.includes('localhost')) {
     db_uri = db_uri.replace(/localhost/g, '127.0.0.1');
