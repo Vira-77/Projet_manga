@@ -11,7 +11,7 @@ const { verifyToken, authorizeRoles } = require('../middlewares/authMiddleware')
 router.get(
     '/:id', 
     verifyToken, 
-    authorizeRoles('admin','utilisateur'), 
+    authorizeRoles('admin','admin_manga','utilisateur'), 
     userController.getUserByIdController
 );
 
@@ -20,7 +20,7 @@ router.get(
 router.put(
     '/:id', 
     verifyToken, 
-    authorizeRoles('admin','utilisateur'), 
+    authorizeRoles('admin','admin_manga','utilisateur'), 
     userController.updateUserController
 );
 

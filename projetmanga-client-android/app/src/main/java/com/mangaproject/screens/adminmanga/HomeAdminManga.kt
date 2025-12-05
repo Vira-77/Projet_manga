@@ -35,6 +35,7 @@ import com.mangaproject.data.repository.StoreRepository
 import com.mangaproject.data.repository.UserRepository
 import com.mangaproject.screens.user.*
 import com.mangaproject.ui.tabs.AdminMangaTab
+import com.mangaproject.ui.tabs.UserTab
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,6 +46,10 @@ fun HomeAdminManga(
 ) {
     // Token & API authentifiée
     val token by prefs.token.collectAsState(initial = "")
+    if (token.isBlank()) {
+        Text("Chargement...", modifier = Modifier.padding(16.dp))
+        return
+    }
     val api = remember(token) { RetrofitInstance.authedApiService(token) }
 
     // Repositories
@@ -70,7 +75,8 @@ fun HomeAdminManga(
         AdminMangaTab.Communautes,
         AdminMangaTab.Magasins,
         AdminMangaTab.CreateManga,
-        AdminMangaTab.MyMangas
+        AdminMangaTab.MyMangas,
+        AdminMangaTab.Profil
     )
 
     var selectedTab by remember { mutableIntStateOf(0) }
@@ -148,6 +154,8 @@ fun HomeAdminManga(
                         navController.navigate("edit_manga/$id")
                     }
                 )
+
+            AdminMangaTab.Profil -> ScreenProfile(homeVm,modifier)
         }
     }
 }

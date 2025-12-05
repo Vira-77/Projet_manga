@@ -27,12 +27,11 @@ import androidx.compose.foundation.clickable
 import kotlinx.coroutines.launch
 
 @Composable
-fun ScreenProfile(vm: HomeViewModel, onEditProfileClicked: () -> Unit, modifier: Modifier = Modifier) {
+fun ScreenProfile(vm: HomeViewModel, modifier: Modifier = Modifier) {
 
     val user by vm.user.collectAsState()
     val scope = rememberCoroutineScope()
 
-    val snackbarHostState = remember { SnackbarHostState() }
 
     // L'édition est toujours "active" pour les champs
     var isSaving by remember { mutableStateOf(false) }

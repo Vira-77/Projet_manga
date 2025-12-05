@@ -89,9 +89,7 @@ fun HomeUser(
             })
             UserTab.Communautes -> ScreenCommunautes(vm, modifier)
             UserTab.Magasins -> ScreenMagasins(vm, modifier)
-            UserTab.Profil -> ScreenProfile(vm,onEditProfileClicked = {
-                navController.navigate("edit_profile")
-            },modifier)
+            UserTab.Profil -> ScreenProfile(vm,modifier)
         }
     }
 }
