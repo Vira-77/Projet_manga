@@ -32,6 +32,7 @@ import com.mangaproject.data.datastore.UserPreferences
 import com.mangaproject.data.repository.GenreRepository
 import com.mangaproject.data.repository.MangaRepository
 import com.mangaproject.data.repository.StoreRepository
+import com.mangaproject.data.repository.UserRepository
 import com.mangaproject.screens.user.*
 import com.mangaproject.ui.tabs.AdminMangaTab
 
@@ -50,10 +51,11 @@ fun HomeAdminManga(
     val mangaRepo = remember(api) { MangaRepository(api) }
     val genreRepo = remember(api) { GenreRepository(api) }
     val storeRepo = remember(api) { StoreRepository(api) }
+    val userRepo = remember(api) { UserRepository(api) }
 
     // ViewModel partagé pour les onglets "user lambda"
     val homeVm: HomeViewModel = viewModel(
-        factory = HomeViewModelFactory(mangaRepo, storeRepo, prefs)
+        factory = HomeViewModelFactory(mangaRepo, storeRepo,userRepo,prefs)
     )
 
     // ViewModel pour la liste des mangas (Mes mangas)

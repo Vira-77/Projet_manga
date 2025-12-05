@@ -20,6 +20,7 @@ import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.HTTP
+import retrofit2.http.Header
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
@@ -85,6 +86,12 @@ interface ApiService {
     @GET("/users")
     suspend fun getAllUsers(): List<User>
 
+
+    @GET("/users/{id}")
+    suspend fun getUser(
+        @Path("id") id: String
+    ): User
+
     @PUT("/users/{id}")
     suspend fun updateUser(
         @Path("id") id: String,
@@ -100,7 +107,6 @@ interface ApiService {
     suspend fun deleteStore(
         @Path("id") id: String
     )
-
 
 
 

@@ -1,17 +1,20 @@
 package com.mangaproject.screens.user
 
+import android.util.Log
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.mangaproject.data.api.RetrofitInstance
 import com.mangaproject.data.datastore.UserPreferences
 import com.mangaproject.data.repository.MangaRepository
 import com.mangaproject.data.repository.StoreRepository
+import com.mangaproject.data.repository.UserRepository
 import com.mangaproject.ui.tabs.UserTab
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -22,21 +25,30 @@ fun HomeUser(
     logout: () -> Unit = {}
 ) {
 
-    val api = remember { RetrofitInstance.apiService }
+    val token by prefs.token.collectAsState(initial = "")
+    if (token.isBlank()) {
+        Text("Chargement...", modifier = Modifier.padding(16.dp))
+        return
+    }
+    val api = remember(token) { RetrofitInstance.authedApiService(token) }
 
-    val mangaRepo = remember { MangaRepository(api) }
-    val storeRepo = remember { StoreRepository(api) }
+    val mangaRepo = remember(api) { MangaRepository(api) }
+    val storeRepo = remember(api) { StoreRepository(api) }
+    val userRepo = remember(api) { UserRepository(api) }
+
 
     val vm: HomeViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
-        factory = HomeViewModelFactory(mangaRepo, storeRepo, prefs)
+        factory = HomeViewModelFactory(mangaRepo, storeRepo,userRepo, prefs)
     )
+
 
     val tabs = listOf(
         UserTab.Home,
         UserTab.Favorites,
         UserTab.Tendances,
         UserTab.Communautes,
-        UserTab.Magasins
+        UserTab.Magasins,
+        UserTab.Profil
     )
 
     var selectedTab by remember { mutableIntStateOf(0) }
@@ -77,6 +89,9 @@ fun HomeUser(
             })
             UserTab.Communautes -> ScreenCommunautes(vm, modifier)
             UserTab.Magasins -> ScreenMagasins(vm, modifier)
+            UserTab.Profil -> ScreenProfile(vm,onEditProfileClicked = {
+                navController.navigate("edit_profile")
+            },modifier)
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.mangaproject.screens.user
 
+import android.net.Uri
 import android.util.Log
 import android.util.Log.e
 import androidx.lifecycle.ViewModel
@@ -8,12 +9,14 @@ import com.mangaproject.data.datastore.UserPreferences
 import com.mangaproject.data.model.*
 import com.mangaproject.data.repository.MangaRepository
 import com.mangaproject.data.repository.StoreRepository
+import com.mangaproject.data.repository.UserRepository
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class HomeViewModel(
     private val mangaRepo: MangaRepository,
     private val storeRepo: StoreRepository,
+    private val userRepo: UserRepository,
     private val prefs: UserPreferences
 ) : ViewModel() {
 
@@ -45,9 +48,21 @@ class HomeViewModel(
     private val _searchLoading = MutableStateFlow(false)
     val searchLoading = _searchLoading.asStateFlow()
 
+    // USER INFO
+    private val _user = MutableStateFlow<User?>(null)
+    val user: StateFlow<User?> = _user.asStateFlow()
+
+    private val _selectedProfilePictureUri = MutableStateFlow<Uri?>(null)
+    val selectedProfilePictureUri: StateFlow<Uri?> = _selectedProfilePictureUri
+
+    fun updateSelectedProfilePictureUri(uri: Uri) {
+        _selectedProfilePictureUri.value = uri
+    }
+
     init {
         refresh()
         loadGenres()
+        loadUser()
     }
 
     // CHARGER TOUS LES GENRES (Jikan)
@@ -90,6 +105,41 @@ class HomeViewModel(
                 println("⚠️ Error searchByGenre(): ${e.message}")
             }
             _searchLoading.value = false
+        }
+    }
+
+    // obtenir information sur l'utilisateur connecté
+    fun loadUser() {
+        viewModelScope.launch {
+            try {
+
+                val userId = prefs.userId.firstOrNull() // get userId from DataStore
+                if (!userId.isNullOrEmpty()) {
+                    val userData = userRepo.getUser(userId) // call repository suspend function
+                    _user.value = userData
+                }
+            } catch (e: Exception) {
+                Log.e("HomeViewModel", "Error loadUser(): ${e.message}")
+            }
+        }
+    }
+
+    fun updateUser(
+        id: String,
+        name: String?,
+        address: String?,
+        bio: String?,
+        profilePicture: String?
+    ) {
+        viewModelScope.launch {
+            userRepo.updateUser(
+                id = id,
+                name = name,
+                address = address,
+                bio = bio,
+                profilePicture = profilePicture
+            )
+            loadUser()
         }
     }
 

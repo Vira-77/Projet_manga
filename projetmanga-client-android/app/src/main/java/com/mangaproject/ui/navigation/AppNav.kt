@@ -36,8 +36,6 @@ import com.mangaproject.screens.manga.MangaDetailScreen
 import androidx.compose.material3.*
 
 
-
-
 @Composable
 fun AppNav(navController: NavHostController) {
 
@@ -159,6 +157,8 @@ fun AppNav(navController: NavHostController) {
                 onBack = { navController.popBackStack() }
             )
         }
+
+
 
 
 

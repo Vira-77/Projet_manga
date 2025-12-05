@@ -1,6 +1,7 @@
 package com.mangaproject.ui.tabs
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Search
@@ -12,5 +13,7 @@ enum class UserTab(val title: String, val icon: ImageVector) {
     Favorites("Favoris", Icons.Default.Favorite),
     Tendances("Tendances", Icons.Default.Search),
     Communautes("Communauté", Icons.Default.Search),
-    Magasins("Magasins", Icons.Default.ShoppingCart)
+    Magasins("Magasins", Icons.Default.ShoppingCart),
+
+    Profil("Profil",Icons.Default.AccountCircle)
 }

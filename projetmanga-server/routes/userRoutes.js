@@ -6,8 +6,27 @@ const userController = require('../controllers/userController');
 const { verifyToken, authorizeRoles } = require('../middlewares/authMiddleware'); 
 
 
+
+// Récupérer un utilisateur par ID
+router.get(
+    '/:id', 
+    verifyToken, 
+    authorizeRoles('admin','utilisateur'), 
+    userController.getUserByIdController
+);
+
+
+// Mettre à jour un utilisateur par ID
+router.put(
+    '/:id', 
+    verifyToken, 
+    authorizeRoles('admin','utilisateur'), 
+    userController.updateUserController
+);
+
+
 // ===================================
-// CRUD ADMINISTRATIF (pour les admins) //  pas forcément utile
+// CRUD ADMINISTRATIF (pour les admins) 
 // ===================================
 
 // Créer un utilisateur 
@@ -27,21 +46,6 @@ router.get(
     userController.getAllUsersController
 );
 
-// Récupérer un utilisateur par ID
-router.get(
-    '/:id', 
-    verifyToken, 
-    authorizeRoles('admin'), 
-    userController.getUserByIdController
-);
-
-// Mettre à jour un utilisateur par ID
-router.put(
-    '/:id', 
-    verifyToken, 
-    authorizeRoles('admin'), 
-    userController.updateUserController
-);
 
 // Supprimer un utilisateur par ID
 router.delete(
