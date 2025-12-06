@@ -188,7 +188,13 @@ fun AppNav(navController: NavHostController) {
 
             ScreenChapterReader(
                 chapterId = chapterId,
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                onNavigateToChapter = { newChapterId ->
+                    // Naviguer vers le nouveau chapitre
+                    navController.navigate("chapterReader/$newChapterId") {
+                        popUpTo("chapterReader/$chapterId") { inclusive = true }
+                    }
+                }
             )
         }
 

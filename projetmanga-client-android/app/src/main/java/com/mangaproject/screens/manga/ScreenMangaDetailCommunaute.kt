@@ -11,6 +11,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
@@ -115,8 +116,9 @@ fun ScreenMangaDetailCommunaute(
                         contentDescription = m.nom,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(300.dp)
-                            .padding(top = 16.dp)
+                            //.height(300.dp)
+                            .padding(top = 16.dp),
+                        contentScale = ContentScale.FillWidth
                     )
                 }
 
@@ -131,9 +133,11 @@ fun ScreenMangaDetailCommunaute(
                 // Auteur et Date de sortie
                 item {
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text("🖋️ Auteur : ${m.auteur}", style = MaterialTheme.typography.bodyLarge)
-                        m.dateDeSortie?.let {
-                            Text("🗓️ Date de sortie : $it", style = MaterialTheme.typography.bodyLarge)
+                        m.dateDeSortie?.let { dateString ->
+                            Text(
+                                text = "🗓️ Date de sortie : ${dateString.take(10)}", // YYYY-MM-DD
+                                style = MaterialTheme.typography.bodyLarge
+                            )
                         }
                     }
                 }

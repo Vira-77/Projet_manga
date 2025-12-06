@@ -21,5 +21,27 @@ data class ChapterByIdResponse(
     val message: String,
 
     @SerializedName("chapter")
-    val chapter: Chapter
+    val chapter: Chapter,
+
+    @SerializedName("navigation")
+    val navigation: ChapterNavigation? = null // ✅ Infos de navigation
+)
+
+data class ChapterNavigation(
+    @SerializedName("previous")
+    val previous: ChapterInfo? = null,
+
+    @SerializedName("next")
+    val next: ChapterInfo? = null
+)
+
+data class ChapterInfo(
+    @SerializedName("_id")
+    val id: String,
+
+    @SerializedName("chapterNumber")
+    val chapterNumber: Int,
+
+    @SerializedName("titre")
+    val titre: String
 )

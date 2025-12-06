@@ -1,5 +1,6 @@
 const chapterService = require('../services/chapterService');
 const { notifyNewChapter, notifyChapterUpdated } = require('../websocket/notifications');
+const Chapter = require('../models/Chapter');
 
 // ==========================
 //   CRÉATION D'UN CHAPITRE
@@ -79,28 +80,56 @@ exports.getAllChapters = async (req, res) => {
 // ==========================
 //   RÉCUPÉRATION D'UN CHAPITRE PAR ID
 // ==========================
+
 exports.getChapterById = async (req, res) => {
     try {
         const { id } = req.params;
-        const { includeManga, includePages } = req.query;
+        const { includePages = 'true', includeManga = 'false' } = req.query;
         
-        const options = {
-            includeManga: includeManga === 'true',
-            includePages: includePages !== 'false' // Par défaut true
-        };
+        let query = Chapter.findById(id);
         
-        const chapter = await chapterService.getChapterById(id, options);
+        if (includeManga === 'true') {
+            query = query.populate('manga', 'nom auteur urlImage');
+        }
+        
+        const chapter = await query;
+        
+        if (!chapter) {
+            return res.status(404).json({ message: 'Chapitre non trouvé' });
+        }
+        
+        //  Trouver le chapitre précédent et suivant
+        const previousChapter = await Chapter.findOne({
+            manga: chapter.manga,
+            chapterNumber: { $lt: chapter.chapterNumber }
+        }).sort({ chapterNumber: -1 }).select('_id chapterNumber titre');
+        
+        const nextChapter = await Chapter.findOne({
+            manga: chapter.manga,
+            chapterNumber: { $gt: chapter.chapterNumber }
+        }).sort({ chapterNumber: 1 }).select('_id chapterNumber titre');
+        
+        // Ne pas inclure les pages si non demandé
+        if (includePages === 'false') {
+            chapter.pages = undefined;
+        }
         
         res.status(200).json({
             message: 'Chapitre trouvé',
-            chapter
+            chapter: chapter,
+            navigation: {
+                previous: previousChapter,
+                next: nextChapter
+            }
         });
     } catch (err) {
         console.error('Erreur récupération chapitre:', err);
-        const statusCode = err.message === 'Chapitre non trouvé' ? 404 : 500;
-        res.status(statusCode).json({ 
-            message: err.message || 'Erreur interne du serveur' 
-        });
+        
+        if (err.name === 'CastError') {
+            return res.status(400).json({ message: 'ID de chapitre invalide' });
+        }
+        
+        res.status(500).json({ message: 'Erreur interne du serveur' });
     }
 };
 

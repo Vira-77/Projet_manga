@@ -4,7 +4,7 @@ const MangaSchema = new mongoose.Schema({
     nom: { type: String, required: true, trim: true },
     description: String,
     dateDeSortie: Date,
-    urlImage: String,
+    urlImage: {type: String,default:'https://www.istockphoto.com/photos/placeholder-image'},
     auteur: { type: String, required: true, trim: true },
 
     genres: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Genre' }],

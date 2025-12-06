@@ -110,7 +110,7 @@ async function addSampleData() {
             description: 'C’est un chat robot qui essaye de comprendre les humains mais il y arrive pas trop.',
             auteur: 'Tom Kenji',
             dateDeSortie: new Date('2020-03-12'),
-            urlImage: 'https://example.com/robocat.jpg',
+            urlImage: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSWyXOhW4UZTz7NLUUrCdQFGtwURtyIu52-DQ&s',
             genres: [shonen._id, fantasy._id],
             jikanId: null,
             source: 'local'
@@ -121,7 +121,7 @@ async function addSampleData() {
             description: 'Un garçon trouve une bulle magique qui parle. Ensemble ils vont dans plein de mondes bizarres.',
             auteur: 'Mina Yori',
             dateDeSortie: new Date('2018-06-04'),
-            urlImage: 'https://example.com/bubblequest.jpg',
+            urlImage: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSWyXOhW4UZTz7NLUUrCdQFGtwURtyIu52-DQ&s',
             genres: [shonen._id],
             jikanId: null,
             source: 'local'
@@ -132,7 +132,7 @@ async function addSampleData() {
             description: 'Un slime qui veut devenir chef cuisinier même si personne veut manger ce qu’il fait.',
             auteur: 'Riku Han',
             dateDeSortie: new Date('2021-11-22'),
-            urlImage: 'https://example.com/cookingslime.jpg',
+            urlImage: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSWyXOhW4UZTz7NLUUrCdQFGtwURtyIu52-DQ&s',
             genres: [shonen._id, fantasy._id],
             jikanId: null,
             source: 'local'
@@ -143,7 +143,7 @@ async function addSampleData() {
             description: 'Deux jeunes s’envoient des lettres qu’ils laissent sur la lune (oui c’est pas très logique).',
             auteur: 'Sora Miho',
             dateDeSortie: new Date('2019-09-10'),
-            urlImage: 'https://example.com/moonletters.jpg',
+            urlImage: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSWyXOhW4UZTz7NLUUrCdQFGtwURtyIu52-DQ&s',
             genres: [shojo._id],
             jikanId: null,
             source: 'local'
@@ -154,7 +154,7 @@ async function addSampleData() {
             description: 'Un mercenaire avec un bras en métal se bat contre des bandits mais il comprend jamais ce qu’ils veulent.',
             auteur: 'Akira Shidou',
             dateDeSortie: new Date('2014-01-17'),
-            urlImage: 'https://example.com/steelshadow.jpg',
+            urlImage: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSWyXOhW4UZTz7NLUUrCdQFGtwURtyIu52-DQ&s',
             genres: [seinen._id, fantasy._id],
             jikanId: null,
             source: 'local'
@@ -165,7 +165,7 @@ async function addSampleData() {
             description: 'Un petit club de volley qui perd tout le temps mais qui essaye quand même de faire mieux.',
             auteur: 'Yuto Kai',
             dateDeSortie: new Date('2017-05-30'),
-            urlImage: 'https://example.com/volleydreams.jpg',
+            urlImage: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSWyXOhW4UZTz7NLUUrCdQFGtwURtyIu52-DQ&s',
             genres: [shonen._id, sport._id],
             jikanId: null,
             source: 'local'
