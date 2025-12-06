@@ -1,5 +1,6 @@
 package com.mangaproject.screens.user
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -11,7 +12,7 @@ import coil.compose.AsyncImage
 import com.mangaproject.data.model.Manga
 
 @Composable
-fun ScreenCommunautes(vm: HomeViewModel, modifier: Modifier = Modifier) {
+fun ScreenCommunautes(vm: HomeViewModel, modifier: Modifier = Modifier, onMangaClick: (String) -> Unit ) {
 
     val localMangas by vm.localMangas.collectAsState()
 
@@ -41,17 +42,17 @@ fun ScreenCommunautes(vm: HomeViewModel, modifier: Modifier = Modifier) {
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(localMangas) { manga ->
-                CommunautesItem(manga)
+                CommunautesItem(manga,onMangaClick)
             }
         }
     }
 }
 
 @Composable
-fun CommunautesItem(manga: Manga) {
+fun CommunautesItem(manga: Manga, onMangaClick: (String) -> Unit ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(4.dp)
+        modifier = Modifier.fillMaxWidth().clickable { onMangaClick(manga.id) },
+        elevation = CardDefaults.cardElevation(4.dp),
     ) {
         Row(modifier = Modifier.padding(12.dp)) {
 

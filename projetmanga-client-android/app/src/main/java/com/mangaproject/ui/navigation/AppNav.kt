@@ -34,6 +34,8 @@ import com.mangaproject.screens.adminmanga.EditMangaViewModel
 import com.mangaproject.screens.adminmanga.EditMangaViewModelFactory
 import com.mangaproject.screens.manga.MangaDetailScreen
 import androidx.compose.material3.*
+import com.mangaproject.screens.manga.ScreenChapterReader
+import com.mangaproject.screens.manga.ScreenMangaDetailCommunaute
 
 
 @Composable
@@ -121,6 +123,23 @@ fun AppNav(navController: NavHostController) {
             )
         }
 
+
+        // pour les mangas ne provenant pas de l'api
+        composable(
+            route = NavigationRoutes.MANGA_DETAIL_COMMUNAUTE,
+            arguments = listOf(navArgument("id") { type = NavType.StringType })
+        ) { backStackEntry ->
+
+            val mangaId = backStackEntry.arguments?.getString("id") ?: ""
+            ScreenMangaDetailCommunaute(
+                id = mangaId,
+                onBack = { navController.popBackStack() },
+                onChapterClick = { chapterId ->
+                    navController.navigate("chapterReader/$chapterId")
+                }
+            )
+        }
+
         composable(
             route = "edit_manga/{id}",
             arguments = listOf(
@@ -160,7 +179,18 @@ fun AppNav(navController: NavHostController) {
 
 
 
+        composable(
+            route = "chapterReader/{chapterId}",
+            arguments = listOf(navArgument("chapterId") { type = NavType.StringType })
+        ) { backStackEntry ->
 
+            val chapterId = backStackEntry.arguments?.getString("chapterId") ?: ""
+
+            ScreenChapterReader(
+                chapterId = chapterId,
+                onBack = { navController.popBackStack() }
+            )
+        }
 
 
 

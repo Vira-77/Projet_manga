@@ -1,5 +1,8 @@
 package com.mangaproject.data.api
 
+import com.mangaproject.data.model.Chapter
+import com.mangaproject.data.model.ChapterByIdResponse
+import com.mangaproject.data.model.ChaptersByMangaResponse
 import com.mangaproject.data.model.CreateMangaRequest
 import com.mangaproject.data.model.FavoriteResponse
 import com.mangaproject.data.model.Genre
@@ -16,6 +19,7 @@ import com.mangaproject.data.model.StoresResponse
 import com.mangaproject.data.model.TopMangaResponse
 import com.mangaproject.data.model.UpdateUserRequest
 import com.mangaproject.data.model.User
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -108,6 +112,15 @@ interface ApiService {
         @Path("id") id: String
     )
 
+    @GET("/chapters/manga/{id}")
+    suspend fun getAllChapterById(
+        @Path("id") id: String
+    ): Response<ChaptersByMangaResponse>
+
+    @GET("/chapters/{id}")
+    suspend fun getChapterById(
+        @Path("id") id: String
+    ): Response<ChapterByIdResponse>
 
 
 }

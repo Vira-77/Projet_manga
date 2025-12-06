@@ -55,6 +55,48 @@ class HomeViewModel(
     private val _selectedProfilePictureUri = MutableStateFlow<Uri?>(null)
     val selectedProfilePictureUri: StateFlow<Uri?> = _selectedProfilePictureUri
 
+
+    // manga
+
+    private val _selectedManga = MutableStateFlow<Manga?>(null)
+    val selectedManga = _selectedManga.asStateFlow()
+
+    //private val _mangaChapters = MutableStateFlow<List<Chapter>>(emptyList())
+    //val mangaChapters = _mangaChapters.asStateFlow()
+
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading = _isLoading.asStateFlow()
+
+    fun loadMangaDetails(mangaId: String) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                // Appel API pour récupérer les détails du manga
+                val response = mangaRepo.getMangaById(mangaId)
+                _selectedManga.value = response
+            } catch (e: Exception) {
+                Log.e("HomeViewModel", "Erreur lors du chargement du manga: ${e.message}")
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    /*
+    fun loadMangaChapters(mangaId: String) {
+        viewModelScope.launch {
+            try {
+                // Appel API pour récupérer les chapitres du manga
+                val response = apiService.getChaptersByManga(mangaId)
+                _mangaChapters.value = response.chapters
+            } catch (e: Exception) {
+                Log.e("HomeViewModel", "Erreur lors du chargement des chapitres: ${e.message}")
+            }
+        }
+    }*/
+
+
+
     fun updateSelectedProfilePictureUri(uri: Uri) {
         _selectedProfilePictureUri.value = uri
     }

@@ -5,6 +5,7 @@ const User = require('../models/User');
 const Genre = require('../models/Genre');
 const Manga = require('../models/Manga');
 const Store = require('../models/Store');
+const Chapter = require('../models/Chapter')
 
 let db_uri = process.env.MONGO_URI;
 
@@ -39,7 +40,8 @@ async function addSampleData() {
             User.deleteMany({}),
             Genre.deleteMany({}),
             Manga.deleteMany({}),
-            Store.deleteMany({})
+            Store.deleteMany({}),
+            Chapter.deleteMany({})
         ]);
         console.log('Collections vidées');
 
@@ -168,6 +170,47 @@ async function addSampleData() {
             jikanId: null,
             source: 'local'
         });
+
+
+        // ==========================
+        //   CHAPITRES POUR ROBO CAT
+        // ==========================
+        console.log('📖 Création des chapitres pour Robo Cat...');
+
+        const chapter1 = await Chapter.create({
+            titre: 'Chapitre 1 - L\'éveil du robot',
+            manga: roboCat._id,
+            chapterNumber: 1,
+            pages: [
+                { numero: 1, urlImage: 'https://i.pinimg.com/236x/97/5d/af/975daf199b0de8650128b2591128976d.jpg' },
+                { numero: 2, urlImage: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQQxqMTQcD6H9OGTXW2n7D9ut6uMKEN799ZMw&s' },
+                { numero: 3, urlImage: 'https://i.pinimg.com/236x/97/5d/af/975daf199b0de8650128b2591128976d.jpg' },
+                { numero: 4, urlImage: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQQxqMTQcD6H9OGTXW2n7D9ut6uMKEN799ZMw&s' },
+                { numero: 5, urlImage: 'https://i.pinimg.com/236x/97/5d/af/975daf199b0de8650128b2591128976d.jpg' }
+            ]
+        });
+
+        const chapter2 = await Chapter.create({
+            titre: 'Chapitre 2 - Premier contact humain',
+            manga: roboCat._id,
+            chapterNumber: 2,
+            pages: [
+                { numero: 1, urlImage: 'https://example.com/robocat/ch2/page1.jpg' },
+                { numero: 2, urlImage: 'https://example.com/robocat/ch2/page2.jpg' },
+                { numero: 3, urlImage: 'https://example.com/robocat/ch2/page3.jpg' },
+                { numero: 4, urlImage: 'https://example.com/robocat/ch2/page4.jpg' }
+            ]
+        });
+
+          // ==========================
+        //   MISE À JOUR DES MANGAS AVEC LEURS CHAPITRES
+        // ==========================
+        console.log(' Liaison des chapitres aux mangas...');
+
+        await Manga.findByIdAndUpdate(roboCat._id, {
+            chapitres: [chapter1._id, chapter2._id]
+        });
+    
 
         //lier les mangas aux genres
         console.log(' Mise à jour des genres avec les mangas...');

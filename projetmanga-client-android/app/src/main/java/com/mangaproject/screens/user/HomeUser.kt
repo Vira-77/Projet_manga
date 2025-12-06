@@ -87,7 +87,9 @@ fun HomeUser(
             UserTab.Tendances -> ScreenTendances(vm, modifier, onOpen = { id ->
                 navController.navigate("manga_detail/$id")
             })
-            UserTab.Communautes -> ScreenCommunautes(vm, modifier)
+            UserTab.Communautes -> ScreenCommunautes(vm, modifier,onMangaClick = { mangaId ->
+                navController.navigate("manga_detail_communaute/$mangaId")
+            })
             UserTab.Magasins -> ScreenMagasins(vm, modifier)
             UserTab.Profil -> ScreenProfile(vm,modifier)
         }

@@ -129,7 +129,9 @@ fun HomeAdminManga(
                 )
 
             AdminMangaTab.Communautes ->
-                ScreenCommunautes(homeVm, modifier)
+                ScreenCommunautes(homeVm, modifier,onMangaClick = { mangaId ->
+                    navController.navigate("mangaDetail/$mangaId")
+                })
 
             AdminMangaTab.Magasins ->
                 ScreenMagasins(homeVm, modifier)

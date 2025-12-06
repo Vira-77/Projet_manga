@@ -1,11 +1,14 @@
 package com.mangaproject.data.repository
 
 import com.mangaproject.data.api.ApiService
+import com.mangaproject.data.model.Chapter
+import com.mangaproject.data.model.ChapterByIdResponse
 import com.mangaproject.data.model.CreateMangaRequest
 import com.mangaproject.data.model.JikanGenre
 import com.mangaproject.data.model.JikanManga
 import com.mangaproject.data.model.Manga
 import com.mangaproject.data.model.MangaUpdateRequest
+import retrofit2.Response
 
 class MangaRepository(private val api: ApiService) {
 
@@ -73,6 +76,8 @@ class MangaRepository(private val api: ApiService) {
 
     suspend fun deleteManga(id: String) = api.deleteManga(id) // api.deleteMangaPost(id)
 
-
+    suspend fun getChapterById(id: String): Response<ChapterByIdResponse> {
+        return api.getChapterById(id)
+    }
 
 }
