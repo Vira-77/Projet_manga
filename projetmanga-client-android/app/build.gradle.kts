@@ -66,7 +66,14 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
     implementation("io.coil-kt:coil-compose:2.6.0")
     implementation("androidx.navigation:navigation-compose:2.7.7")
-
-
-
+    
+    // Socket.io client
+    implementation("io.socket:socket.io-client:2.1.1")
+    
+    // Notifications Android
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
+    implementation("androidx.core:core-ktx:1.13.1")
+    
+    // Lifecycle pour les services
+    implementation("androidx.lifecycle:lifecycle-service:2.7.0")
 }

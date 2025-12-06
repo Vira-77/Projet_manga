@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.mangaproject.data.datastore.UserPreferences
 import com.mangaproject.data.model.*
 import com.mangaproject.data.repository.MangaRepository
+import com.mangaproject.data.repository.ReadingHistoryRepository
 import com.mangaproject.data.repository.StoreRepository
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -14,7 +15,8 @@ import kotlinx.coroutines.launch
 class HomeViewModel(
     private val mangaRepo: MangaRepository,
     private val storeRepo: StoreRepository,
-    private val prefs: UserPreferences
+    private val prefs: UserPreferences,
+    private val readingHistoryRepo: ReadingHistoryRepository? = null
 ) : ViewModel() {
 
     // FAVORIS
@@ -41,6 +43,10 @@ class HomeViewModel(
     private val _genres = MutableStateFlow<List<JikanGenre>>(emptyList())
     val genres: StateFlow<List<JikanGenre>> = _genres
 
+    // HISTORIQUE DE LECTURE
+    private val _readingHistory = MutableStateFlow<List<ReadingHistory>>(emptyList())
+    val readingHistory: StateFlow<List<ReadingHistory>> = _readingHistory
+
     // LOADING
     private val _searchLoading = MutableStateFlow(false)
     val searchLoading = _searchLoading.asStateFlow()
@@ -48,6 +54,41 @@ class HomeViewModel(
     init {
         refresh()
         loadGenres()
+        loadReadingHistory()
+    }
+    
+    // Charger l'historique de lecture
+    fun loadReadingHistory() {
+        if (readingHistoryRepo == null) return
+        viewModelScope.launch {
+            try {
+                _readingHistory.value = readingHistoryRepo.getReadingHistory()
+            } catch (e: Exception) {
+                println("⚠️ Error loadReadingHistory(): ${e.message}")
+            }
+        }
+    }
+    
+    // Mettre à jour l'historique de lecture
+    fun updateReadingHistory(
+        mangaId: String,
+        source: String,
+        chapterId: String?,
+        chapterNumber: Int?,
+        title: String?,
+        imageUrl: String?
+    ) {
+        if (readingHistoryRepo == null) return
+        viewModelScope.launch {
+            try {
+                readingHistoryRepo.updateReadingHistory(
+                    mangaId, source, chapterId, chapterNumber, title, imageUrl
+                )
+                loadReadingHistory() // Recharger après mise à jour
+            } catch (e: Exception) {
+                println("⚠️ Error updateReadingHistory(): ${e.message}")
+            }
+        }
     }
 
     // CHARGER TOUS LES GENRES (Jikan)

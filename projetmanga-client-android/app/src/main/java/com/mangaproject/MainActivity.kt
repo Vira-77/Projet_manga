@@ -3,27 +3,74 @@ package com.mangaproject
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.mangaproject.ui.theme.MyMangaProjectTheme
-
-
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.lifecycleScope
+import com.mangaproject.data.datastore.UserPreferences
+import com.mangaproject.data.notifications.NotificationService
+import com.mangaproject.data.websocket.SocketService
 import androidx.navigation.compose.rememberNavController
 import com.mangaproject.ui.navigation.AppNav
+import kotlinx.coroutines.launch
+import org.json.JSONObject
 
 class MainActivity : ComponentActivity() {
+    
+    private lateinit var socketService: SocketService
+    private lateinit var notificationService: NotificationService
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // Initialiser les services
+        socketService = SocketService.getInstance(this)
+        notificationService = NotificationService(this)
+        
+        // Configurer les callbacks de notifications
+        setupNotificationCallbacks()
+        
         setContent {
+            val context = LocalContext.current
+            val prefs = UserPreferences(context)
+            val token by prefs.token.collectAsState(initial = "")
             val navController = rememberNavController()
+            
+            // Connecter au WebSocket si l'utilisateur est connecté
+            LaunchedEffect(token) {
+                if (token.isNotBlank()) {
+                    socketService.connect()
+                } else {
+                    socketService.disconnect()
+                }
+            }
+            
             AppNav(navController)
         }
+    }
+    
+    private fun setupNotificationCallbacks() {
+        socketService.onNewChapter = { mangaId, chapter ->
+            notificationService.showNewChapterNotification(mangaId, chapter)
+        }
+        
+        socketService.onChapterUpdated = { mangaId, chapter ->
+            notificationService.showChapterUpdatedNotification(mangaId, chapter)
+        }
+        
+        socketService.onNewComment = { mangaId, comment ->
+            notificationService.showNewCommentNotification(mangaId, comment)
+        }
+        
+        socketService.onMangaStatus = { mangaId, status ->
+            notificationService.showMangaStatusNotification(mangaId, status)
+        }
+    }
+    
+    override fun onDestroy() {
+        super.onDestroy()
+        socketService.disconnect()
     }
 }
 

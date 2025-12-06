@@ -16,6 +16,9 @@ import com.mangaproject.data.model.StoresResponse
 import com.mangaproject.data.model.TopMangaResponse
 import com.mangaproject.data.model.UpdateUserRequest
 import com.mangaproject.data.model.User
+import com.mangaproject.data.model.ReadingHistoryResponse
+import com.mangaproject.data.model.SingleReadingHistoryResponse
+import com.mangaproject.data.model.UpdateReadingHistoryRequest
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -101,7 +104,27 @@ interface ApiService {
         @Path("id") id: String
     )
 
+    // Historique de lecture
+    @GET("/reading-history")
+    suspend fun getReadingHistory(): ReadingHistoryResponse
 
+    @PUT("/reading-history")
+    suspend fun updateReadingHistory(
+        @Body request: UpdateReadingHistoryRequest
+    ): SingleReadingHistoryResponse
 
+    @GET("/reading-history/{mangaId}")
+    suspend fun getMangaReadingHistory(
+        @Path("mangaId") mangaId: String
+    ): SingleReadingHistoryResponse
+
+    @DELETE("/reading-history/{mangaId}")
+    suspend fun deleteReadingHistory(
+        @Path("mangaId") mangaId: String
+    )
+
+    // Socket.io rooms
+    @GET("/socket/rooms")
+    suspend fun getSocketRooms(): SocketRoomsResponse
 
 }

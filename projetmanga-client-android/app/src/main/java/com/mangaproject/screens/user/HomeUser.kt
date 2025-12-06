@@ -8,9 +8,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import com.mangaproject.data.api.RetrofitInstance
 import com.mangaproject.data.datastore.UserPreferences
 import com.mangaproject.data.repository.MangaRepository
+import com.mangaproject.data.repository.ReadingHistoryRepository
 import com.mangaproject.data.repository.StoreRepository
 import com.mangaproject.ui.tabs.UserTab
 
@@ -23,12 +26,18 @@ fun HomeUser(
 ) {
 
     val api = remember { RetrofitInstance.apiService }
-
+    val token by prefs.token.collectAsState(initial = "")
+    
     val mangaRepo = remember { MangaRepository(api) }
     val storeRepo = remember { StoreRepository(api) }
+    val readingHistoryRepo = remember(token) {
+        if (token.isNotBlank()) {
+            ReadingHistoryRepository(RetrofitInstance.authedApiService(token))
+        } else null
+    }
 
     val vm: HomeViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
-        factory = HomeViewModelFactory(mangaRepo, storeRepo, prefs)
+        factory = HomeViewModelFactory(mangaRepo, storeRepo, prefs, readingHistoryRepo)
     )
 
     val tabs = listOf(
@@ -36,7 +45,8 @@ fun HomeUser(
         UserTab.Favorites,
         UserTab.Tendances,
         UserTab.Communautes,
-        UserTab.Magasins
+        UserTab.Magasins,
+        UserTab.History
     )
 
     var selectedTab by remember { mutableIntStateOf(0) }
@@ -77,6 +87,9 @@ fun HomeUser(
             })
             UserTab.Communautes -> ScreenCommunautes(vm, modifier)
             UserTab.Magasins -> ScreenMagasins(vm, modifier)
+            UserTab.History -> ScreenHistory(vm, modifier, onOpen = { id ->
+                navController.navigate("manga_detail/$id")
+            })
         }
     }
 }

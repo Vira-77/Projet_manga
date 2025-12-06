@@ -37,6 +37,8 @@ const genreRoutes = require('./routes/genreRoutes');
 const storeRoutes = require('./routes/storeRoutes');
 const externalRoutes = require('./routes/externalRoutes');
 const favoriteRoutes = require('./routes/favoriteRoutes');
+const readingHistoryRoutes = require('./routes/readingHistoryRoutes');
+const socketRoutes = require('./routes/socketRoutes');
 const aiRoutes = require('./routes/aiRoutes');
 
 app.use('/users', userRoutes);
@@ -46,6 +48,8 @@ app.use('/genres', genreRoutes);
 app.use('/stores', storeRoutes);
 app.use('/external', externalRoutes);
 app.use('/favorites', favoriteRoutes);
+app.use('/reading-history', readingHistoryRoutes);
+app.use('/socket', socketRoutes);
 app.use("/ai", aiRoutes);
 // ==========================
 //   Socket.io & serveur HTTP
