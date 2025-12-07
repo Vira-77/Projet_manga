@@ -1,17 +1,12 @@
 const Manga = require("../models/Manga");
 
-let cachedCatalogue = null;
-
 async function loadCatalogue() {
-    if (!cachedCatalogue) {
-        console.log("Catalogue chargé !");
-        const mangas = await Manga.find().lean();
+    const mangas = await Manga.find().lean();
 
-        cachedCatalogue = mangas.map(m => ({
-            nom: m.nom
-        }));
-    }
-    return cachedCatalogue;
+    return mangas.map(m => ({
+        title: m.nom || "",
+        genres: m.genres || [], // ObjectIds acceptés
+    }));
 }
 
 module.exports = { loadCatalogue };

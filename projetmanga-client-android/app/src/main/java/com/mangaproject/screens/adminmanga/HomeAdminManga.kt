@@ -124,7 +124,7 @@ fun HomeAdminManga(
                 ScreenCommunautes(homeVm, modifier)
 
             AdminMangaTab.Magasins ->
-                ScreenMagasins(homeVm, modifier)
+                ScreenMagasins(homeVm, navController, modifier)
 
             // Création de manga
             AdminMangaTab.CreateManga -> {

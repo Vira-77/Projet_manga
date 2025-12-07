@@ -115,4 +115,15 @@ class HomeViewModel(
             try { _stores.value = storeRepo.getStores() } catch (_: Exception) {}
         }
     }
+
+    fun loadStores() {
+        viewModelScope.launch {
+            try {
+                _stores.value = storeRepo.getStores()
+            } catch (e: Exception) {
+                println(" ERROR loadStores(): ${e.message}")
+            }
+        }
+    }
+
 }

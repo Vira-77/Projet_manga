@@ -27,6 +27,8 @@ services:
       - JWT_SECRET=superSecretMangaKey
       - JWT_EXPIRES=1h
       - NODE_ENV=development
+    command: sh -c "node db/db.js && node app.js"
+
     ports:
       - "3000:3000"
 

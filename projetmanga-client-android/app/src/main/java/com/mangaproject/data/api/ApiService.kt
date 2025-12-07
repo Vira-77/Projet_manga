@@ -11,6 +11,8 @@ import com.mangaproject.data.model.MangaDetailResponse
 import com.mangaproject.data.model.MangaResponse
 import com.mangaproject.data.model.MangaUpdateRequest
 import com.mangaproject.data.model.SearchResponse
+import com.mangaproject.data.model.AiRequest
+import com.mangaproject.data.model.AiResponse
 import com.mangaproject.data.model.Store
 import com.mangaproject.data.model.StoresResponse
 import com.mangaproject.data.model.TopMangaResponse
@@ -101,7 +103,9 @@ interface ApiService {
         @Path("id") id: String
     )
 
-
-
+    @POST("/ai/chat")
+    suspend fun chatWithAI(
+        @Body body: AiRequest
+    ): AiResponse
 
 }
