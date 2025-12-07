@@ -107,65 +107,14 @@ fun ScreenProfile(vm: HomeViewModel, modifier: Modifier = Modifier) {
 
     // ✅ Fonction de sauvegarde simplifiée
     val onSaveClicked: () -> Unit = {
-        Log.d("ScreenProfile", "💾 Sauvegarde démarrée")
-        isSaving = true
-        errorMessage = null
-        showSuccessMessage = false
-
-        scope.launch {
-            try {
-                // 1. Upload de la photo si sélectionnée
-                if (selectedImageUri != null) {
-                    Log.d("ScreenProfile", "⬆️ Upload de l'image...")
-                    vm.uploadProfilePicture(context)
-
-                    // ✅ Attendre que l'upload soit terminé
-                    var attempts = 0
-                    while (uploadState is UploadState.Loading && attempts < 30) {
-                        kotlinx.coroutines.delay(200)
-                        attempts++
-                    }
-
-                    // Vérifier si l'upload a réussi
-                    if (uploadState is UploadState.Error) {
-                        Log.e("ScreenProfile", "❌ Upload échoué")
-                        isSaving = false
-                        return@launch
-                    }
-
-                    Log.d("ScreenProfile", "✅ Upload terminé")
-                }
-
-                // 2. Mise à jour des autres champs
-                if (editedName != u.name ||
-                    editedAddress != (u.address ?: "") ||
-                    editedBio != (u.bio ?: "")) {
-
-                    Log.d("ScreenProfile", "💾 Mise à jour des champs...")
-                    vm.updateUser(
-                        id = u.id,
-                        name = editedName.ifBlank { null },
-                        address = editedAddress.ifBlank { null },
-                        bio = editedBio.ifBlank { null },
-                        profilePicture = null
-                    )
-                }
-
-                // ✅ Recharger le profil après la mise à jour
-                kotlinx.coroutines.delay(500)
-                vm.loadUser()
-
-                showSuccessMessage = true
-                errorMessage = null
-                isSaving = false
-
-            } catch (e: Exception) {
-                Log.e("ScreenProfile", "❌ Erreur sauvegarde", e)
-                errorMessage = e.message ?: "Erreur inconnue"
-                showSuccessMessage = false
-                isSaving = false
-            }
-        }
+        vm.saveProfile(
+            context = context,
+            userId = u.id,
+            name = editedName.ifBlank { null },
+            address = editedAddress.ifBlank { null },
+            bio = editedBio.ifBlank { null },
+            hasImageToUpload = selectedImageUri != null
+        )
     }
 
     Column(

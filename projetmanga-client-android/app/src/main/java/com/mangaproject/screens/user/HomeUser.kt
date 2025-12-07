@@ -31,9 +31,14 @@ fun HomeUser(
     logout: () -> Unit = {}
 ) {
 
-    val api = remember { RetrofitInstance.apiService }
-    val token by prefs.token.collectAsState(initial = "")
 
+    val token by prefs.token.collectAsState(initial = "")
+    if (token.isBlank()) {
+        Text("Chargement...", modifier = Modifier.padding(16.dp))
+        return
+    }
+
+    val api = remember { RetrofitInstance.authedApiService(token) }
     // Utiliser l'API authentifiée pour les favoris
     val authedApi = remember(token) {
         if (token.isNotBlank()) {
@@ -41,7 +46,8 @@ fun HomeUser(
         } else null
     }
 
-    val mangaRepo = remember(api)(authedApi) {
+
+    val mangaRepo = remember(api){
         MangaRepository(authedApi ?: api)
     }
     val storeRepo = remember(api) { StoreRepository(api) }

@@ -27,6 +27,7 @@ import com.mangaproject.data.api.RetrofitInstance
 import com.mangaproject.data.model.Chapter
 import com.mangaproject.data.model.ChapterNavigation
 import com.mangaproject.data.model.Page
+import com.mangaproject.utils.ImageUtils.toFullImageUrl
 
 // ✅ Enum pour les modes de lecture
 enum class ReadingMode {
@@ -326,7 +327,7 @@ fun HorizontalReaderMode(
                 contentAlignment = Alignment.Center
             ) {
                 AsyncImage(
-                    model = page.urlImage,
+                    model = page.urlImage.toFullImageUrl(),
                     contentDescription = "Page ${page.numero}",
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Fit
@@ -474,7 +475,7 @@ fun PageImageVertical(page: Page, totalPages: Int) {
 
         // Image de la page
         AsyncImage(
-            model = page.urlImage,
+            model = page.urlImage.toFullImageUrl(),
             contentDescription = "Page ${page.numero}",
             modifier = Modifier
                 .fillMaxWidth()

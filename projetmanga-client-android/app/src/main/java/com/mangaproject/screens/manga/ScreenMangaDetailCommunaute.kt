@@ -18,6 +18,7 @@ import coil.compose.AsyncImage
 import com.mangaproject.data.api.RetrofitInstance
 import com.mangaproject.data.model.Manga
 import com.mangaproject.data.model.Chapter
+import com.mangaproject.utils.ImageUtils.toFullImageUrl
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -112,7 +113,7 @@ fun ScreenMangaDetailCommunaute(
                 // Image du manga
                 item {
                     AsyncImage(
-                        model = m.urlImage,
+                        model = m.urlImage.toFullImageUrl(),
                         contentDescription = m.nom,
                         modifier = Modifier
                             .fillMaxWidth()

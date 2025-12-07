@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.mangaproject.data.model.Manga
+import com.mangaproject.utils.ImageUtils.toFullImageUrl
 
 @Composable
 fun ScreenCommunautes(vm: HomeViewModel, modifier: Modifier = Modifier, onMangaClick: (String) -> Unit ) {
@@ -66,7 +67,7 @@ fun CommunautesItem(manga: Manga, vm: HomeViewModel, onMangaClick: (String) -> U
         ) {
 
             AsyncImage(
-                model = manga.urlImage,
+                model = manga.urlImage.toFullImageUrl(),
                 contentDescription = manga.nom,
                 modifier = Modifier.size(80.dp)
             )

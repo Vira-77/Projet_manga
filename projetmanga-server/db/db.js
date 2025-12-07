@@ -173,28 +173,39 @@ async function addSampleData() {
             source: 'local'
         });
 
+        const billyBat = await Manga.create({
+             nom: 'BillyBat',
+            description: `It's 1949, Japanese-American Kevin Yamagata is the author of the renowned detective comic book series "Billy Bat", after serving in the Allied Forces in World War II. As his series becomes a massive hit, Kevin discovers that his famed character Billy Bat already existed before within a Japanese manga. When learning that he may have unconsciously copied the character he saw during his occupation there, Kevin returns to Japan to find Billy Bat's original creator and seek permission from him to use their character. However, as he traces back Billy Bat's roots, he finds himself unraveling a dark twisted history of murders, bat sigils, conspiracy theories, and prophecies that somehow involve the character he thought he created.`,
+            auteur: 'Urasawa Naoki, Nagasaki Takashi',
+            dateDeSortie: new Date('2017-05-30'),
+            urlImage: '/uploads/mangas/billy_bat_cover.jpg',
+            genres: [shonen._id, sport._id],
+            jikanId: null,
+            source: 'local'
+        })
+
 
         // ==========================
-        //   CHAPITRES POUR ROBO CAT
+        //   CHAPITRES POUR BillyBat
         // ==========================
         console.log('📖 Création des chapitres pour Robo Cat...');
 
         const chapter1 = await Chapter.create({
             titre: 'Chapitre 1 - L\'éveil du robot',
-            manga: roboCat._id,
+            manga: billyBat._id,
             chapterNumber: 1,
             pages: [
-                { numero: 1, urlImage: 'https://i.pinimg.com/236x/97/5d/af/975daf199b0de8650128b2591128976d.jpg' },
-                { numero: 2, urlImage: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQQxqMTQcD6H9OGTXW2n7D9ut6uMKEN799ZMw&s' },
-                { numero: 3, urlImage: 'https://i.pinimg.com/236x/97/5d/af/975daf199b0de8650128b2591128976d.jpg' },
-                { numero: 4, urlImage: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQQxqMTQcD6H9OGTXW2n7D9ut6uMKEN799ZMw&s' },
-                { numero: 5, urlImage: 'https://i.pinimg.com/236x/97/5d/af/975daf199b0de8650128b2591128976d.jpg' }
+                { numero: 1, urlImage: '/uploads/chapters/billybat_1_1.jpeg' },
+                { numero: 2, urlImage: '/uploads/chapters/billybat_1_2.jpeg' },
+                { numero: 3, urlImage: '/uploads/chapters/billybat_1_3.jpeg' },
+                { numero: 4, urlImage: '/uploads/chapters/billybat_1_4.jpeg' },
+                { numero: 5, urlImage: '/uploads/chapters/billybat_1_5.jpeg' }
             ]
         });
 
         const chapter2 = await Chapter.create({
             titre: 'Chapitre 2 - Premier contact humain',
-            manga: roboCat._id,
+            manga: billyBat._id,
             chapterNumber: 2,
             pages: [
                 { numero: 1, urlImage: 'https://example.com/robocat/ch2/page1.jpg' },
@@ -209,7 +220,7 @@ async function addSampleData() {
         // ==========================
         console.log(' Liaison des chapitres aux mangas...');
 
-        await Manga.findByIdAndUpdate(roboCat._id, {
+        await Manga.findByIdAndUpdate(billyBat._id, {
             chapitres: [chapter1._id, chapter2._id]
         });
     

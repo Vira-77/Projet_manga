@@ -349,7 +349,63 @@ class HomeViewModel(
     fun resetUploadState() {
         _uploadState.value = UploadState.Idle
     }
+
+    // Dans HomeViewModel, ajouter une méthode unifiée
+    fun saveProfile(
+        context: Context,
+        userId: String,
+        name: String?,
+        address: String?,
+        bio: String?,
+        hasImageToUpload: Boolean
+    ) {
+        viewModelScope.launch {
+            try {
+                _uploadState.value = UploadState.Loading
+
+                // 1. Upload image si nécessaire
+                if (hasImageToUpload && _selectedProfilePictureUri.value != null) {
+                    Log.d("HomeViewModel", "📸 Upload image...")
+                    val uploadResult = userRepo.uploadProfilePicture(
+                        context,
+                        _selectedProfilePictureUri.value!!
+                    )
+
+                    if (uploadResult.isFailure) {
+                        _uploadState.value = UploadState.Error(
+                            uploadResult.exceptionOrNull()?.message ?: "Erreur upload"
+                        )
+                        return@launch
+                    }
+
+                    _selectedProfilePictureUri.value = null
+                    Log.d("HomeViewModel", "✅ Image uploadée")
+                }
+
+                // 2. Mise à jour des autres champs
+                Log.d("HomeViewModel", "💾 Mise à jour profil...")
+                userRepo.updateUser(
+                    id = userId,
+                    name = name,
+                    address = address,
+                    bio = bio,
+                    profilePicture = null
+                )
+
+                // 3. Recharger
+                loadUser()
+
+                _uploadState.value = UploadState.Success("Profil mis à jour avec succès")
+
+            } catch (e: Exception) {
+                Log.e("HomeViewModel", "❌ Erreur saveProfile", e)
+                _uploadState.value = UploadState.Error(e.message ?: "Erreur inconnue")
+            }
+        }
+    }
 }
+
+
 sealed class UploadState {
     object Idle : UploadState()
     object Loading : UploadState()

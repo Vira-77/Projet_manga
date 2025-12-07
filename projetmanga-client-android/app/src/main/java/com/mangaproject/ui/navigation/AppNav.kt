@@ -36,13 +36,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.LaunchedEffect
 import com.mangaproject.data.repository.StoreRepository
 import com.mangaproject.screens.user.HomeViewModelFactory
-import com.mangaproject.screens.adminmanga.EditMangaScreen
-import com.mangaproject.screens.adminmanga.EditMangaViewModel
-import com.mangaproject.screens.adminmanga.EditMangaViewModelFactory
-import com.mangaproject.screens.manga.MangaDetailScreen
-import androidx.compose.material3.*
 import com.mangaproject.screens.manga.ScreenChapterReader
 import com.mangaproject.screens.manga.ScreenMangaDetailCommunaute
+import com.mangaproject.data.repository.UserRepository
 
 
 @Composable
@@ -238,9 +234,10 @@ fun AppNav(navController: NavHostController) {
             val api = remember { RetrofitInstance.apiService }
             val mangaRepo = remember { MangaRepository(api) }
             val storeRepo = remember { StoreRepository(api) }
+            val userRepo = remember { UserRepository(api) }
 
             val homeVm: HomeViewModel = viewModel(
-                factory = HomeViewModelFactory(mangaRepo, storeRepo, prefs)
+                factory = HomeViewModelFactory(mangaRepo, storeRepo, userRepo,prefs)
             )
 
             val locationVM: LocationViewModel = viewModel()
