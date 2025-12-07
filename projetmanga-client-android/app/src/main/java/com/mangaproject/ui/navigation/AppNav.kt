@@ -39,6 +39,10 @@ import com.mangaproject.screens.user.HomeViewModelFactory
 import com.mangaproject.screens.manga.ScreenChapterReader
 import com.mangaproject.screens.manga.ScreenMangaDetailCommunaute
 import com.mangaproject.data.repository.UserRepository
+import com.mangaproject.data.repository.ReadingHistoryRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 
 @Composable
@@ -202,6 +206,7 @@ fun AppNav(navController: NavHostController) {
         ) { backStackEntry ->
 
             val chapterId = backStackEntry.arguments?.getString("chapterId") ?: ""
+            val token by prefs.token.collectAsState(initial = "")
 
             ScreenChapterReader(
                 chapterId = chapterId,
@@ -210,6 +215,44 @@ fun AppNav(navController: NavHostController) {
                     // Naviguer vers le nouveau chapitre
                     navController.navigate("chapterReader/$newChapterId") {
                         popUpTo("chapterReader/$chapterId") { inclusive = true }
+                    }
+                },
+                onChapterLoaded = { mangaId, chId, chapterNumber ->
+                    println("📖 onChapterLoaded appelé - mangaId: $mangaId, chapterId: $chId, chapterNumber: $chapterNumber")
+                    // Mettre à jour l'historique de lecture
+                    if (token.isNotBlank()) {
+                        // Créer le repository avec le token actuel
+                        val readingHistoryRepo = ReadingHistoryRepository(RetrofitInstance.authedApiService(token))
+                        CoroutineScope(Dispatchers.IO).launch {
+                            try {
+                                println("📖 Récupération des infos du manga $mangaId...")
+                                // Récupérer les infos du manga pour avoir le titre et l'imageUrl
+                                val mangaResponse = RetrofitInstance.apiService.getMangaLocalById(mangaId)
+                                val manga = mangaResponse.manga
+                                
+                                println("📖 Manga récupéré: ${manga.nom}, imageUrl: ${manga.urlImage}")
+                                
+                                val result = readingHistoryRepo.updateReadingHistory(
+                                    mangaId = mangaId,
+                                    source = "local", // Les chapitres viennent toujours de mangas locaux
+                                    chapterId = chId,
+                                    chapterNumber = chapterNumber,
+                                    title = manga.nom,
+                                    imageUrl = manga.urlImage
+                                )
+                                
+                                if (result != null) {
+                                    println(" Historique mis à jour avec succès pour manga $mangaId, chapitre $chId")
+                                } else {
+                                    println(" Échec de la mise à jour de l'historique (résultat null)")
+                                }
+                            } catch (e: Exception) {
+                                println(" Erreur lors de la mise à jour de l'historique: ${e.message}")
+                                e.printStackTrace()
+                            }
+                        }
+                    } else {
+                        println(" Token vide - impossible de mettre à jour l'historique")
                     }
                 }
             )

@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -14,6 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.mangaproject.data.model.ReadingHistory
+import com.mangaproject.utils.ImageUtils.toFullImageUrl
 
 @Composable
 fun ScreenHistory(
@@ -22,6 +24,12 @@ fun ScreenHistory(
     onOpen: (String) -> Unit
 ) {
     val readingHistory by vm.readingHistory.collectAsState()
+
+    // Recharger l'historique quand l'écran devient visible
+    LaunchedEffect(Unit) {
+        println("Rechargement de l'historique...")
+        vm.loadReadingHistory()
+    }
 
     Column(modifier = modifier.fillMaxSize().padding(16.dp)) {
         Text(
@@ -75,7 +83,7 @@ fun ReadingHistoryItem(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             AsyncImage(
-                model = history.imageUrl ?: "",
+                model = history.imageUrl?.toFullImageUrl() ?: "",
                 contentDescription = history.title,
                 modifier = Modifier
                     .width(80.dp)

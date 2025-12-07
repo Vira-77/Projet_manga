@@ -120,7 +120,17 @@ fun HomeAdminManga(
                 ScreenHome(homeVm, modifier)
 
             AdminMangaTab.Favorites ->
-                ScreenFavorites(homeVm, modifier)
+                ScreenFavorites(
+                    homeVm, 
+                    modifier,
+                    onMangaClick = { mangaId, source ->
+                        if (source == "jikan") {
+                            navController.navigate("manga_detail/$mangaId")
+                        } else {
+                            navController.navigate("manga_detail_communaute/$mangaId")
+                        }
+                    }
+                )
 
             AdminMangaTab.Tendances ->
                 ScreenTendances(

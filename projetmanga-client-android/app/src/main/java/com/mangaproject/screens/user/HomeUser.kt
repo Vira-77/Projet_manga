@@ -110,7 +110,17 @@ fun HomeUser(
 
             when (tabs[selectedTab]) {
                 UserTab.Home -> ScreenHome(vm, modifier)
-                UserTab.Favorites -> ScreenFavorites(vm, modifier)
+                UserTab.Favorites -> ScreenFavorites(
+                    vm, 
+                    modifier,
+                    onMangaClick = { mangaId, source ->
+                        if (source == "jikan") {
+                            navController.navigate("manga_detail/$mangaId")
+                        } else {
+                            navController.navigate("manga_detail_communaute/$mangaId")
+                        }
+                    }
+                )
                 UserTab.Tendances -> ScreenTendances(vm, modifier, onOpen = { id ->
                     navController.navigate("manga_detail/$id")
                 })
@@ -120,9 +130,19 @@ fun HomeUser(
             })
                 UserTab.Magasins -> ScreenMagasins(vm, navController, modifier)
             UserTab.Profil -> ScreenProfile(vm,modifier)
-                UserTab.History -> ScreenHistory(vm, modifier, onOpen = { id ->
-                    navController.navigate("manga_detail/$id")
-                })
+                UserTab.History -> {
+                    val history by vm.readingHistory.collectAsState()
+                    ScreenHistory(vm, modifier, onOpen = { mangaId ->
+                        // Trouver l'entrée d'historique pour déterminer la source
+                        val historyEntry = history.find { it.mangaId == mangaId }
+                        val source = historyEntry?.source ?: "local"
+                        if (source == "jikan") {
+                            navController.navigate("manga_detail/$mangaId")
+                        } else {
+                            navController.navigate("manga_detail_communaute/$mangaId")
+                        }
+                    })
+                }
             }
         }
         //LA bulle IA – maintenant au-dessus de tout

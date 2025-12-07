@@ -40,7 +40,8 @@ enum class ReadingMode {
 fun ScreenChapterReader(
     chapterId: String,
     onBack: () -> Unit,
-    onNavigateToChapter: (String) -> Unit // ✅ Callback pour navigation
+    onNavigateToChapter: (String) -> Unit, // ✅ Callback pour navigation
+    onChapterLoaded: ((mangaId: String, chapterId: String, chapterNumber: Int?) -> Unit)? = null // ✅ Callback pour historique
 ) {
     var chapter by remember { mutableStateOf<Chapter?>(null) }
     var navigation by remember { mutableStateOf<ChapterNavigation?>(null) } // ✅ État navigation
@@ -66,9 +67,19 @@ fun ScreenChapterReader(
                 println("✅ Chapitre: ${chapter?.titre}")
                 println("⬅️ Précédent: ${navigation?.previous?.titre}")
                 println("➡️ Suivant: ${navigation?.next?.titre}")
+
+                // ✅ Mettre à jour l'historique quand le chapitre est chargé
+                chapter?.let { ch ->
+                    println("Appel du callback onChapterLoaded - mangaId: ${ch.manga}, chapterId: ${ch.id}, chapterNumber: ${ch.chapterNumber}")
+                    onChapterLoaded?.invoke(
+                        ch.manga,
+                        ch.id,
+                        ch.chapterNumber
+                    ) ?: println("⚠️ onChapterLoaded est null!")
+                }
             } else {
                 error = "Erreur ${response.code()}: ${response.message()}"
-                println("❌ Erreur API: ${response.code()}")
+                println("Erreur API: ${response.code()}")
             }
 
         } catch (e: Exception) {
