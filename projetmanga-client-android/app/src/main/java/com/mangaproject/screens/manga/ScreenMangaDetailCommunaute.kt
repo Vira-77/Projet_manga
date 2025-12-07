@@ -25,35 +25,39 @@ import com.mangaproject.utils.ImageUtils.toFullImageUrl
 fun ScreenMangaDetailCommunaute(
     id: String,
     onBack: () -> Unit,
-    onChapterClick: ((String) -> Unit)? = null //
+    onChapterClick: ((String) -> Unit)? = null
 ) {
     var manga by remember { mutableStateOf<Manga?>(null) }
-    var chapters by remember { mutableStateOf<List<Chapter>>(emptyList()) } //
+    var chapters by remember { mutableStateOf<List<Chapter>>(emptyList()) }
     var error by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(true) }
-    var chaptersLoading by remember { mutableStateOf(false) } //
+    var chaptersLoading by remember { mutableStateOf(false) }
 
     LaunchedEffect(id) {
         try {
-            // Charger le manga
             val mangaResponse = RetrofitInstance.apiService.getMangaLocalById(id)
             manga = mangaResponse.manga
 
-            // ✅ Charger les chapitres avec gestion null-safety
+            if (manga == null) {
+                error = "Manga introuvable"
+                return@LaunchedEffect
+            }
+
             chaptersLoading = true
             try {
                 val chaptersResponse = RetrofitInstance.apiService.getAllChapterById(id)
 
                 if (chaptersResponse.isSuccessful) {
-                    // ✅ Utiliser l'opérateur sûr (?.)
-                    chapters = chaptersResponse.body()?.chapters ?: emptyList()
+                    val body = chaptersResponse.body()
+                    if (body != null) {
+                        chapters = body.chapters
+                    } else {
+                        chapters = emptyList()
+                    }
                 } else {
-                    println("Erreur API chapitres: ${chaptersResponse.code()}")
                     chapters = emptyList()
                 }
-
             } catch (e: Exception) {
-                println("Erreur lors du chargement des chapitres: ${e.message}")
                 chapters = emptyList()
             } finally {
                 chaptersLoading = false
@@ -117,7 +121,6 @@ fun ScreenMangaDetailCommunaute(
                         contentDescription = m.nom,
                         modifier = Modifier
                             .fillMaxWidth()
-                            //.height(300.dp)
                             .padding(top = 16.dp),
                         contentScale = ContentScale.FillWidth
                     )
@@ -131,27 +134,17 @@ fun ScreenMangaDetailCommunaute(
                     )
                 }
 
-                // Auteur et Date de sortie
+                // Date de sortie
                 item {
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         m.dateDeSortie?.let { dateString ->
                             Text(
-                                text = "🗓️ Date de sortie : ${dateString.take(10)}", // YYYY-MM-DD
+                                text = "🗓️ Date de sortie : ${dateString.take(10)}",
                                 style = MaterialTheme.typography.bodyLarge
                             )
                         }
                     }
                 }
-
-                // Genres
-                /*
-                m.genres?.takeIf { it.isNotEmpty() }?.let { genres ->
-                    item {
-                        Text("🏷️ Genres :", style = MaterialTheme.typography.titleMedium)
-                        Spacer(Modifier.height(4.dp))
-                        Text(genres.joinToString(separator = ", "), style = MaterialTheme.typography.bodyMedium)
-                    }
-                }*/
 
                 // Description/Synopsis
                 m.description?.let {
@@ -162,7 +155,7 @@ fun ScreenMangaDetailCommunaute(
                     }
                 }
 
-                // ✅ SECTION CHAPITRES
+                // SECTION CHAPITRES
                 item {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -187,7 +180,7 @@ fun ScreenMangaDetailCommunaute(
                     }
                 }
 
-                // ✅ LISTE DES CHAPITRES
+                // LISTE DES CHAPITRES
                 if (chaptersLoading) {
                     item {
                         Box(
@@ -216,12 +209,13 @@ fun ScreenMangaDetailCommunaute(
                         }
                     }
                 } else {
-                    // ✅ Afficher chaque chapitre
                     items(chapters) { chapter ->
                         ChapterCard(
                             chapter = chapter,
                             onClick = {
-                                onChapterClick?.invoke(chapter.id)
+                                chapter.id?.let { chapterId ->
+                                    onChapterClick?.invoke(chapterId)
+                                }
                             }
                         )
                     }
@@ -236,16 +230,18 @@ fun ScreenMangaDetailCommunaute(
     }
 }
 
-// ✅ Composant pour afficher un chapitre
 @Composable
 fun ChapterCard(
     chapter: Chapter,
     onClick: () -> Unit
 ) {
+    val hasValidId = !chapter.id.isNullOrBlank()
+    val hasPages = !chapter.pages.isNullOrEmpty()
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() },
+            .clickable(enabled = hasValidId, onClick = onClick),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Row(
@@ -260,7 +256,7 @@ fun ChapterCard(
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
-                    text = chapter.titre,
+                    text = chapter.titre ?: "Sans titre",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Medium
                 )
@@ -268,16 +264,14 @@ fun ChapterCard(
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    // Nombre de pages si disponible
-                    chapter.pages?.let { pages ->
+                    if (hasPages) {
                         Text(
-                            text = "${pages.size} pages",
+                            text = "${chapter.pages!!.size} pages",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
 
-                    // Numéro de chapitre si disponible
                     chapter.chapterNumber?.let { number ->
                         Text(
                             text = "Ch. $number",
@@ -288,11 +282,13 @@ fun ChapterCard(
                 }
             }
 
-            // Icône de lecture
             Icon(
                 Icons.Default.PlayArrow,
                 contentDescription = "Lire le chapitre",
-                tint = MaterialTheme.colorScheme.primary,
+                tint = if (hasValidId && hasPages)
+                    MaterialTheme.colorScheme.primary
+                else
+                    MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(24.dp)
             )
         }

@@ -10,6 +10,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.mangaproject.data.model.Manga
+import com.mangaproject.utils.ImageUtils.toFullImageUrl
 
 @Composable
 fun ScreenMyMangas(
@@ -67,7 +68,7 @@ fun MangaCard(
         ) {
 
             AsyncImage(
-                model = manga.urlImage,
+                model = manga.urlImage.toFullImageUrl(),
                 contentDescription = manga.nom,
                 modifier = Modifier.size(80.dp)
             )

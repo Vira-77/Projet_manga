@@ -2,83 +2,75 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
-const createUploadDirs = () => {
-    const dirs = [
-        './public/uploads/profiles',
-        './public/uploads/mangas',
-        './public/uploads/chapters',
-        './public/uploads/stores'
-    ];
-    
-    dirs.forEach(dir => {
-        if (!fs.existsSync(dir)) {
-            fs.mkdirSync(dir, { recursive: true });
-            console.log(`✅ Dossier créé: ${dir}`);
+// ====================================
+// CONFIGURATION POUR PROFIL
+// ====================================
+const profileStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const uploadPath = path.join(__dirname, '../public/uploads/profiles');
+        if (!fs.existsSync(uploadPath)) {
+            fs.mkdirSync(uploadPath, { recursive: true });
         }
-    });
-};
-
-createUploadDirs();
-
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        let uploadPath = './public/uploads/';
-        
-        if (req.path.includes('profile')) {
-            uploadPath += 'profiles';
-        } else if (req.path.includes('manga')) {
-            uploadPath += 'mangas';
-        } else if (req.path.includes('chapter')) {
-            uploadPath += 'chapters';
-        } else if (req.path.includes('store')) {
-            uploadPath += 'stores';
-        } else {
-            uploadPath += 'profiles'; // Par défaut
-        }
-        
         cb(null, uploadPath);
     },
-    filename: function (req, file, cb) {
-        // Générer un nom unique
-        const userId = req.user?.id || 'guest';
-        const timestamp = Date.now();
-        const randomString = Math.random().toString(36).substring(2, 8);
-        const ext = path.extname(file.originalname);
-        
-        const filename = `${userId}_${timestamp}_${randomString}${ext}`;
-        cb(null, filename);
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, 'profile-' + uniqueSuffix + path.extname(file.originalname));
     }
 });
 
-const fileFilter = (req, file, cb) => {
-    if (file.mimetype.startsWith('image/')) {
-        console.log('✅ Image acceptée:', file.mimetype);
-        cb(null, true);
-    } else {
-        console.log('❌ Pas une image:', file.mimetype);
-        cb(new Error('Le fichier doit être une image.'), false);
-    }
-};
-
-// Configuration Multer
-const upload = multer({
-    storage: storage,
-    limits: {
-        fileSize: 5 * 1024 * 1024 // 5MB max
+// ====================================
+// CONFIGURATION POUR PAGES DE CHAPITRES
+// ====================================
+const chapterPageStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const uploadPath = path.join(__dirname, '../public/uploads/chapters');
+        if (!fs.existsSync(uploadPath)) {
+            fs.mkdirSync(uploadPath, { recursive: true });
+        }
+        cb(null, uploadPath);
     },
-    fileFilter: fileFilter
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, 'page-' + uniqueSuffix + path.extname(file.originalname));
+    }
 });
 
-// Fonction helper pour supprimer une image
-const deleteImage = (imagePath) => {
-    if (!imagePath) return;
+/*
+// ====================================
+// FILTRES DE FICHIERS
+// ====================================
+const imageFileFilter = (req, file, cb) => {
+    const allowedTypes = /jpeg|jpg|png|gif|webp/;
+    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = allowedTypes.test(file.mimetype);
     
-    const fullPath = path.join(__dirname, '..', 'public', imagePath);
-    
-    if (fs.existsSync(fullPath)) {
-        fs.unlinkSync(fullPath);
-        console.log(`🗑️ Image supprimée: ${imagePath}`);
+    if (mimetype && extname) {
+        return cb(null, true);
+    } else {
+        cb(new Error('Seules les images sont autorisées (jpeg, jpg, png, gif, webp)'));
     }
-};
+};*/
 
-module.exports = { upload, deleteImage };
+// ====================================
+// INSTANCES MULTER
+// ====================================
+
+// Pour les photos de profil
+const upload = multer({
+    storage: profileStorage,
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+    //fileFilter: imageFileFilter
+});
+
+// Pour les pages de chapitres
+const uploadChapterPage = multer({
+    storage: chapterPageStorage,
+    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+    //fileFilter: imageFileFilter
+});
+
+module.exports = {
+    upload,
+    uploadChapterPage
+};

@@ -115,6 +115,10 @@ exports.getAllMangas = async (options = {}) => {
 // ==========================
 exports.getMangaById = async (id, options = {}) => {
     const { includeGenres = false, includeChapters = false } = options;
+
+    console.log('🔍 Recherche manga avec ID:', id);
+        console.log('🔍 Type de l\'ID:', typeof id);
+        console.log('🔍 Longueur de l\'ID:', id?.length);
     
     let query = Manga.findById(id);
     
