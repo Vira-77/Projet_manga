@@ -3,8 +3,12 @@ package com.mangaproject.screens.user
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
@@ -88,7 +92,10 @@ fun ScreenHome(vm: HomeViewModel, modifier: Modifier = Modifier) {
                         .fillMaxWidth()
                         .padding(vertical = 6.dp)
                 ) {
-                    Row(modifier = Modifier.padding(12.dp)) {
+                    Row(
+                        modifier = Modifier.padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
 
                         AsyncImage(
                             model = manga.images?.jpg?.image_url,
@@ -98,9 +105,30 @@ fun ScreenHome(vm: HomeViewModel, modifier: Modifier = Modifier) {
 
                         Spacer(Modifier.width(12.dp))
 
-                        Column {
+                        Column(modifier = Modifier.weight(1f)) {
                             Text(manga.title, style = MaterialTheme.typography.titleMedium)
                             manga.score?.let { Text("Score : $it") }
+                        }
+                        
+                        // Icône étoile pour les favoris (mangas Jikan)
+                        IconButton(
+                            onClick = {
+                                val mangaId = manga.mal_id?.toString() ?: return@IconButton
+                                val isFavorite = vm.isFavorite(mangaId)
+                                if (isFavorite) {
+                                    vm.removeFavorite(mangaId)
+                                } else {
+                                    vm.addFavorite(mangaId, "jikan")
+                                }
+                            }
+                        ) {
+                            val mangaId = manga.mal_id?.toString() ?: ""
+                            val isFavorite = vm.isFavorite(mangaId)
+                            Icon(
+                                imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                                contentDescription = if (isFavorite) "Retirer des favoris" else "Ajouter aux favoris",
+                                tint = if (isFavorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
+                            )
                         }
                     }
                 }

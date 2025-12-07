@@ -1,5 +1,6 @@
 package com.mangaproject.data.api
 
+import com.mangaproject.data.model.AddFavoriteRequest
 import com.mangaproject.data.model.CreateMangaRequest
 import com.mangaproject.data.model.FavoriteResponse
 import com.mangaproject.data.model.Genre
@@ -19,6 +20,7 @@ import com.mangaproject.data.model.User
 import com.mangaproject.data.model.ReadingHistoryResponse
 import com.mangaproject.data.model.SingleReadingHistoryResponse
 import com.mangaproject.data.model.UpdateReadingHistoryRequest
+import com.mangaproject.data.model.SocketRoomsResponse
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -35,8 +37,17 @@ interface ApiService {
     suspend fun getAllLocalMangas(): MangaResponse
 
     // Favoris
+    @GET("/favorites")
+    suspend fun getFavorites(): FavoriteResponse
+    
     @GET("/favorites/{userId}")
     suspend fun getUserFavorites(@Path("userId") userId: String): FavoriteResponse
+    
+    @POST("/favorites")
+    suspend fun addFavorite(@Body request: AddFavoriteRequest): FavoriteResponse
+    
+    @DELETE("/favorites/{mangaId}")
+    suspend fun removeFavorite(@Path("mangaId") mangaId: String)
 
     // Magasins
     @GET("/stores")

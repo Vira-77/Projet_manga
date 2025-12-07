@@ -35,12 +35,12 @@ class SocketService private constructor(private val context: Context) {
     private var isConnected = false
     private var reconnectAttempts = 0
     private val maxReconnectAttempts = 5
+    private var currentRooms: List<String> = emptyList()
     
     // Callbacks pour les notifications
     var onNewChapter: ((mangaId: String, chapter: JSONObject) -> Unit)? = null
     var onChapterUpdated: ((mangaId: String, chapter: JSONObject) -> Unit)? = null
     var onMangaStatus: ((mangaId: String, status: JSONObject) -> Unit)? = null
-    var onNewComment: ((mangaId: String, comment: JSONObject) -> Unit)? = null
     
     /**
      * Connecte au serveur Socket.io et rejoint les rooms appropriées
@@ -61,9 +61,9 @@ class SocketService private constructor(private val context: Context) {
             // Obtenir les rooms à rejoindre
             val apiService = RetrofitInstance.authedApiService(token)
             val roomsResponse = apiService.getSocketRooms()
-            val rooms = roomsResponse.rooms
+            currentRooms = roomsResponse.rooms
             
-            Log.d(TAG, "Rooms à rejoindre: $rooms")
+            Log.d(TAG, "Rooms à rejoindre: $currentRooms")
             
             // Configuration Socket.io
             val options = IO.Options().apply {
@@ -84,9 +84,9 @@ class SocketService private constructor(private val context: Context) {
                 reconnectAttempts = 0
                 
                 // Rejoindre les rooms
-                if (rooms.isNotEmpty()) {
-                    socket?.emit("join", rooms)
-                    Log.d(TAG, "Rejoint ${rooms.size} rooms")
+                if (currentRooms.isNotEmpty()) {
+                    socket?.emit("join", currentRooms)
+                    Log.d(TAG, "Rejoint ${currentRooms.size} rooms")
                 }
             }
             
@@ -101,16 +101,8 @@ class SocketService private constructor(private val context: Context) {
                 handleReconnection()
             }
             
-            socket?.on(Socket.EVENT_RECONNECT) {
-                Log.d(TAG, "Reconnecté au serveur")
-                isConnected = true
-                reconnectAttempts = 0
-                
-                // Rejoindre à nouveau les rooms
-                if (rooms.isNotEmpty()) {
-                    socket?.emit("join", rooms)
-                }
-            }
+            // Note: EVENT_RECONNECT n'existe pas dans cette version de Socket.io
+            // La reconnexion est gérée automatiquement et déclenche EVENT_CONNECT
             
             // Écouter les notifications
             socket?.on("chapter:new") { args ->
@@ -139,16 +131,6 @@ class SocketService private constructor(private val context: Context) {
                     val mangaId = data.getString("mangaId")
                     Log.d(TAG, "Statut manga mis à jour: $mangaId")
                     onMangaStatus?.invoke(mangaId, data)
-                }
-            }
-            
-            socket?.on("comment:new") { args ->
-                val data = args[0] as? JSONObject
-                if (data != null) {
-                    val mangaId = data.getString("mangaId")
-                    val comment = data.getJSONObject("comment")
-                    Log.d(TAG, "Nouveau commentaire pour manga: $mangaId")
-                    onNewComment?.invoke(mangaId, comment)
                 }
             }
             

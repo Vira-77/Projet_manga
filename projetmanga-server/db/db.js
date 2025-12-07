@@ -5,6 +5,8 @@ const User = require('../models/User');
 const Genre = require('../models/Genre');
 const Manga = require('../models/Manga');
 const Store = require('../models/Store');
+const Favorite = require('../models/Favorite');
+
 
 let db_uri = process.env.MONGO_URI;
 
@@ -39,7 +41,8 @@ async function addSampleData() {
             User.deleteMany({}),
             Genre.deleteMany({}),
             Manga.deleteMany({}),
-            Store.deleteMany({})
+            Store.deleteMany({}),
+            Favorite.deleteMany({})
         ]);
         console.log('Collections vidées');
 
@@ -101,7 +104,7 @@ async function addSampleData() {
         // ==========================
         //   MANGAS
         // ==========================
-        console.log('📚 Création des mangas...');
+        console.log('Création des mangas...');
 
         const roboCat = await Manga.create({
             nom: 'Robo Cat',
@@ -193,12 +196,76 @@ async function addSampleData() {
         });
 
         // ==========================
-        //   FAVORIS UTILISATEUR
+        //   FAVORIS UTILISATEUR 
         // ==========================
-        console.log('Ajout des favoris pour John Doe...');
+        console.log('Ajout des favoris pour John Doe ');
 
         user1.favorites = [roboCat._id, bubbleQuest._id, cookingSlime._id];
         await user1.save();
+
+        // ==========================
+        //   FAVORIS UTILISATEUR (nouveau système Favorite)
+        // ==========================
+        console.log('Ajout des favoris dans le modèle Favorite...');
+
+        // Favoris pour John Doe (utilisateur normal)
+        await Favorite.create({
+            user: user1._id,
+            mangaId: roboCat._id.toString(),
+            source: 'local',
+            title: roboCat.nom,
+            imageUrl: roboCat.urlImage
+        });
+
+        await Favorite.create({
+            user: user1._id,
+            mangaId: bubbleQuest._id.toString(),
+            source: 'local',
+            title: bubbleQuest.nom,
+            imageUrl: bubbleQuest.urlImage
+        });
+
+        await Favorite.create({
+            user: user1._id,
+            mangaId: cookingSlime._id.toString(),
+            source: 'local',
+            title: cookingSlime.nom,
+            imageUrl: cookingSlime.urlImage
+        });
+
+        await Favorite.create({
+            user: user1._id,
+            mangaId: moonLetters._id.toString(),
+            source: 'local',
+            title: moonLetters.nom,
+            imageUrl: moonLetters.urlImage
+        });
+
+        // Favoris pour Admin (pour tester)
+        await Favorite.create({
+            user: admin._id,
+            mangaId: steelShadow._id.toString(),
+            source: 'local',
+            title: steelShadow.nom,
+            imageUrl: steelShadow.urlImage
+        });
+
+        await Favorite.create({
+            user: admin._id,
+            mangaId: volleyDreams._id.toString(),
+            source: 'local',
+            title: volleyDreams.nom,
+            imageUrl: volleyDreams.urlImage
+        });
+
+        // Favoris pour Admin Manga (pour tester)
+        await Favorite.create({
+            user: adminManga._id,
+            mangaId: roboCat._id.toString(),
+            source: 'local',
+            title: roboCat.nom,
+            imageUrl: roboCat.urlImage
+        });
 
 
         //création des magasins
@@ -236,10 +303,15 @@ async function addSampleData() {
         console.log(`   - ${await Genre.countDocuments()} genres`);
         console.log(`   - ${await Manga.countDocuments()} mangas`);
         console.log(`   - ${await Store.countDocuments()} magasins`);
+        console.log(`   - ${await Favorite.countDocuments()} favoris`);
         console.log('\nComptes créés (mots de passe AVANT hash) :');
         console.log('   Admin:       admin@manga.com / admin123');
         console.log('   Admin Manga: adminmanga@manga.com / admin123');
         console.log('   Utilisateur: john@example.com / password123');
+        console.log('\nFavoris créés:');
+        console.log('   John Doe: Robo Cat, Bubble Quest, Cooking Slime, Moon Letters');
+        console.log('   Admin: Steel Shadow, Volley Dreams');
+        console.log('   Admin Manga: Robo Cat');
 
     } catch (err) {
         console.error('Erreur lors de l\'ajout des données:', err);

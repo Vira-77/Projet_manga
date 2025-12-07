@@ -7,14 +7,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.lifecycleScope
 import com.mangaproject.data.datastore.UserPreferences
 import com.mangaproject.data.notifications.NotificationService
 import com.mangaproject.data.websocket.SocketService
 import androidx.navigation.compose.rememberNavController
 import com.mangaproject.ui.navigation.AppNav
-import kotlinx.coroutines.launch
-import org.json.JSONObject
 
 class MainActivity : ComponentActivity() {
     
@@ -59,10 +56,6 @@ class MainActivity : ComponentActivity() {
             notificationService.showChapterUpdatedNotification(mangaId, chapter)
         }
         
-        socketService.onNewComment = { mangaId, comment ->
-            notificationService.showNewCommentNotification(mangaId, comment)
-        }
-        
         socketService.onMangaStatus = { mangaId, status ->
             notificationService.showMangaStatusNotification(mangaId, status)
         }
@@ -71,22 +64,5 @@ class MainActivity : ComponentActivity() {
     override fun onDestroy() {
         super.onDestroy()
         socketService.disconnect()
-    }
-}
-
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    MyMangaProjectTheme {
-        Greeting("Android")
     }
 }

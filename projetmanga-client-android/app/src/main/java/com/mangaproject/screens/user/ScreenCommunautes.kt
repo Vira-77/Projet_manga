@@ -3,8 +3,12 @@ package com.mangaproject.screens.user
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
@@ -41,19 +45,24 @@ fun ScreenCommunautes(vm: HomeViewModel, modifier: Modifier = Modifier) {
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(localMangas) { manga ->
-                CommunautesItem(manga)
+                CommunautesItem(manga, vm)
             }
         }
     }
 }
 
 @Composable
-fun CommunautesItem(manga: Manga) {
+fun CommunautesItem(manga: Manga, vm: HomeViewModel) {
+    val isFavorite = vm.isFavorite(manga.id)
+    
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
-        Row(modifier = Modifier.padding(12.dp)) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
 
             AsyncImage(
                 model = manga.urlImage,
@@ -63,7 +72,7 @@ fun CommunautesItem(manga: Manga) {
 
             Spacer(modifier = Modifier.width(12.dp))
 
-            Column {
+            Column(modifier = Modifier.weight(1f)) {
 
                 Text(
                     text = manga.nom,
@@ -81,6 +90,23 @@ fun CommunautesItem(manga: Manga) {
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
+            }
+            
+            // Icône étoile pour les favoris
+            IconButton(
+                onClick = {
+                    if (isFavorite) {
+                        vm.removeFavorite(manga.id)
+                    } else {
+                        vm.addFavorite(manga.id, "local")
+                    }
+                }
+            ) {
+                Icon(
+                    imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                    contentDescription = if (isFavorite) "Retirer des favoris" else "Ajouter aux favoris",
+                    tint = if (isFavorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
+                )
             }
         }
     }

@@ -4,8 +4,10 @@ import android.util.Log
 import android.util.Log.e
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mangaproject.data.api.RetrofitInstance
 import com.mangaproject.data.datastore.UserPreferences
 import com.mangaproject.data.model.*
+import com.mangaproject.data.repository.FavoriteRepository
 import com.mangaproject.data.repository.MangaRepository
 import com.mangaproject.data.repository.ReadingHistoryRepository
 import com.mangaproject.data.repository.StoreRepository
@@ -137,9 +139,33 @@ class HomeViewModel(
     // RAFFRAICHIR TOUT
     fun refresh() {
         viewModelScope.launch {
-            val userId = prefs.userId.firstOrNull()
-
-            try { if (userId != null) _favorites.value = mangaRepo.getUserFavorites(userId) } catch (_: Exception) {}
+            val token = prefs.token.firstOrNull()
+            
+            // Charger les favoris avec l'API authentifiée
+            if (token != null && token.isNotBlank()) {
+                try {
+                    val authedApi = RetrofitInstance.authedApiService(token)
+                    val authedMangaRepo = MangaRepository(authedApi)
+                    _favorites.value = authedMangaRepo.getFavorites()
+                    Log.d("HomeViewModel", "Favoris chargés: ${_favorites.value.size}")
+                } catch (e: Exception) {
+                    Log.e("HomeViewModel", "Erreur récupération favoris: ${e.message}", e)
+                    // Fallback : utiliser userId si disponible
+                    try {
+                        val userId = prefs.userId.firstOrNull()
+                        if (userId != null) {
+                            val authedApi = RetrofitInstance.authedApiService(token)
+                            val authedMangaRepo = MangaRepository(authedApi)
+                            _favorites.value = authedMangaRepo.getUserFavorites(userId)
+                        }
+                    } catch (e2: Exception) {
+                        Log.e("HomeViewModel", "Erreur récupération favoris (fallback): ${e2.message}", e2)
+                    }
+                }
+            } else {
+                Log.w("HomeViewModel", "Token non disponible pour charger les favoris")
+            }
+            
             try { _trends.value = mangaRepo.getTrends() } catch (_: Exception) {}
             try {
                 try {
@@ -154,6 +180,50 @@ class HomeViewModel(
 
             } catch (_: Exception) {}
             try { _stores.value = storeRepo.getStores() } catch (_: Exception) {}
+        }
+    }
+    
+    // Ajouter un favori
+    fun addFavorite(mangaId: String, source: String = "local") {
+        viewModelScope.launch {
+            try {
+                val token = prefs.token.firstOrNull()
+                if (token != null && token.isNotBlank()) {
+                    val authedApi = RetrofitInstance.authedApiService(token)
+                    val favoriteRepo = FavoriteRepository(authedApi)
+                    favoriteRepo.addFavorite(mangaId, source)
+                    // Recharger les favoris après ajout
+                    refresh()
+                }
+            } catch (e: Exception) {
+                Log.e("HomeViewModel", "Erreur ajout favori: ${e.message}", e)
+            }
+        }
+    }
+    
+    // Retirer un favori
+    fun removeFavorite(mangaId: String) {
+        viewModelScope.launch {
+            try {
+                val token = prefs.token.firstOrNull()
+                if (token != null && token.isNotBlank()) {
+                    val authedApi = RetrofitInstance.authedApiService(token)
+                    val favoriteRepo = FavoriteRepository(authedApi)
+                    favoriteRepo.removeFavorite(mangaId)
+                    // Recharger les favoris après suppression
+                    refresh()
+                }
+            } catch (e: Exception) {
+                Log.e("HomeViewModel", "Erreur suppression favori: ${e.message}", e)
+            }
+        }
+    }
+    
+    // Vérifier si un manga est en favori
+    fun isFavorite(mangaId: String): Boolean {
+        return _favorites.value.any { 
+            it.id == mangaId || 
+            (it.jikanId != null && it.jikanId.toString() == mangaId)
         }
     }
 }

@@ -74,6 +74,14 @@ exports.getAllMangas = async (req, res) => {
 exports.getMangaById = async (req, res) => {
     try {
         const { id } = req.params;
+        
+        // Valider que l'ID est un ObjectId valide (24 caractères hexadécimaux)
+        if (!id || !/^[0-9a-fA-F]{24}$/.test(id)) {
+            return res.status(400).json({ 
+                message: 'ID de manga invalide. L\'ID doit être un ObjectId MongoDB valide (24 caractères hexadécimaux).' 
+            });
+        }
+        
         const { includeGenres, includeChapters } = req.query;
         
         const options = {
