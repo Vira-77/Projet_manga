@@ -67,7 +67,7 @@ dependencies {
     // MapLibre
     implementation("org.maplibre.gl:android-sdk:12.2.1")
     implementation(libs.play.services.maps)
-}
+
 
     implementation("androidx.navigation:navigation-compose:2.7.7")
 
