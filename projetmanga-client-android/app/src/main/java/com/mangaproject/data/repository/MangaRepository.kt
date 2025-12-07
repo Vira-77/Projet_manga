@@ -14,7 +14,7 @@ import com.mangaproject.data.model.*
 
 class MangaRepository(
     private val api: ApiService,
-    private val local: LocalStorage
+    private val local: LocalStorage?=null
 ) {
 
     suspend fun getLocalMangas(): List<Manga> {
@@ -33,7 +33,7 @@ class MangaRepository(
     suspend fun getTrends(forceRefresh: Boolean = false): List<JikanManga> {
 
         // cache ?
-        val cached = local.loadTrending()
+        val cached = local?.loadTrending() ?: emptyList()
         if (!forceRefresh && cached.isNotEmpty()) {
             return cached
         }
@@ -42,7 +42,7 @@ class MangaRepository(
         val fresh = api.getTopMangas().top
 
         // save
-        local.saveTrending(fresh)
+        local?.saveTrending(fresh)
 
         return fresh
     }

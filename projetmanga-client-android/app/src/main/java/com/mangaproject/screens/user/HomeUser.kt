@@ -51,7 +51,7 @@ fun HomeUser(
 
     val context = LocalContext.current
     val localStorage = remember { DataStoreLocalStorage(context) }
-    val mangaRepo = remember(api, localStorage)(api){
+    val mangaRepo = remember(api, localStorage){
         MangaRepository(authedApi ?: api, localStorage)
     }
     val storeRepo = remember(api) { StoreRepository(api) }
