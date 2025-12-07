@@ -39,6 +39,9 @@ import com.mangaproject.screens.user.HomeViewModelFactory
 import com.mangaproject.screens.manga.ScreenChapterReader
 import com.mangaproject.screens.manga.ScreenMangaDetailCommunaute
 import com.mangaproject.data.repository.UserRepository
+import com.mangaproject.screens.manga.MangaDetailScreen
+import androidx.compose.material3.*
+import com.mangaproject.data.local.DataStoreLocalStorage
 
 
 @Composable
@@ -180,7 +183,9 @@ fun AppNav(navController: NavHostController) {
             }
 
             val api = remember(token) { RetrofitInstance.authedApiService(token) }
-            val mangaRepo = remember(api) { MangaRepository(api) }
+            val context = LocalContext.current
+            val localStorage = remember { DataStoreLocalStorage(context) }
+            val mangaRepo = remember(api, localStorage) { MangaRepository(api, localStorage) }
             val genreRepo = remember(api) { GenreRepository(api) }
 
             val vm: EditMangaViewModel = viewModel(

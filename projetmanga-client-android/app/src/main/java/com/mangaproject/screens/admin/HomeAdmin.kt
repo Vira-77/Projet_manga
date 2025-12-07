@@ -9,6 +9,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mangaproject.data.api.RetrofitInstance
 import com.mangaproject.data.datastore.UserPreferences
+import com.mangaproject.data.local.DataStoreLocalStorage
 import com.mangaproject.data.repository.MangaRepository
 import com.mangaproject.data.repository.StoreRepository
 import com.mangaproject.data.repository.UserRepository
@@ -32,7 +33,10 @@ fun HomeAdmin(
     val api = remember(token) { RetrofitInstance.authedApiService(token) }
 
     val userRepo = remember(api) { UserRepository(api) }
-    val mangaRepo = remember(api) { MangaRepository(api) }
+
+    val localStorage = remember { DataStoreLocalStorage(context) }
+    val mangaRepo = remember(api, localStorage) { MangaRepository(api, localStorage) }
+
     val storeRepo = remember(api) { StoreRepository(api) }
 
     val vm: AdminHomeViewModel = viewModel(

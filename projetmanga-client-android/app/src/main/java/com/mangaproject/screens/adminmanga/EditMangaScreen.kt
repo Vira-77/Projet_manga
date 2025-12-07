@@ -2,14 +2,15 @@ package com.mangaproject.screens.adminmanga
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.mangaproject.data.model.Genre
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -24,21 +25,19 @@ fun EditMangaScreen(
     val deleteSuccess by vm.deleteSuccess.collectAsState()
     val manga by vm.manga.collectAsState()
     val genres by vm.genres.collectAsState()
+    val chapters by vm.chapters.collectAsState()
 
     var nom by remember { mutableStateOf("") }
     var auteur by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var date by remember { mutableStateOf("") }
     var imageUrl by remember { mutableStateOf("") }
-
     var selectedGenres by remember { mutableStateOf<List<String>>(emptyList()) }
     var genreMenuOpened by remember { mutableStateOf(false) }
+    var newChapterText by remember { mutableStateOf("") }
 
-    LaunchedEffect(mangaId) {
-        vm.load(mangaId)
-    }
+    LaunchedEffect(mangaId) { vm.load(mangaId) }
 
-    // Une fois le manga récupéré → remplir les champs
     LaunchedEffect(manga) {
         manga?.let {
             nom = it.nom
@@ -46,12 +45,10 @@ fun EditMangaScreen(
             description = it.description ?: ""
             date = it.dateDeSortie ?: ""
             imageUrl = it.urlImage ?: ""
-
             selectedGenres = it.genres ?: emptyList()
         }
     }
 
-    // Quand suppression réussie → retour arrière
     LaunchedEffect(deleteSuccess) {
         if (deleteSuccess) {
             vm.resetState()
@@ -59,16 +56,13 @@ fun EditMangaScreen(
         }
     }
 
-    // Popup succés
     if (success) {
         AlertDialog(
             onDismissRequest = { vm.resetState() },
             title = { Text("Succès") },
             text = { Text("Le manga a été mis à jour") },
             confirmButton = {
-                TextButton(onClick = { vm.resetState() }) {
-                    Text("OK")
-                }
+                TextButton(onClick = { vm.resetState() }) { Text("OK") }
             }
         )
     }
@@ -92,8 +86,7 @@ fun EditMangaScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-
-            // IMAGE
+            // Image
             item {
                 AsyncImage(
                     model = imageUrl,
@@ -104,53 +97,32 @@ fun EditMangaScreen(
                 )
             }
 
-            // CHAMPS TEXTE
-            item {
-                OutlinedTextField(
-                    value = nom,
-                    onValueChange = { nom = it },
-                    label = { Text("Nom du manga") },
-                    modifier = Modifier.fillMaxWidth()
-                )
+            // Champs texte
+            listOf(
+                "Nom" to nom,
+                "Auteur" to auteur,
+                "Description" to description,
+                "Date de sortie (YYYY-MM-DD)" to date,
+                "URL image" to imageUrl
+            ).forEachIndexed { i, pair ->
+                item {
+                    OutlinedTextField(
+                        value = when(i) {
+                            0 -> nom; 1 -> auteur; 2 -> description; 3 -> date; else -> imageUrl
+                        },
+                        onValueChange = {
+                            when(i){
+                                0 -> nom = it; 1 -> auteur = it; 2 -> description = it
+                                3 -> date = it; else -> imageUrl = it
+                            }
+                        },
+                        label = { Text(pair.first) },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
             }
 
-            item {
-                OutlinedTextField(
-                    value = auteur,
-                    onValueChange = { auteur = it },
-                    label = { Text("Auteur") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-
-            item {
-                OutlinedTextField(
-                    value = description,
-                    onValueChange = { description = it },
-                    label = { Text("Description") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-
-            item {
-                OutlinedTextField(
-                    value = date,
-                    onValueChange = { date = it },
-                    label = { Text("Date de sortie (YYYY-MM-DD)") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-
-            item {
-                OutlinedTextField(
-                    value = imageUrl,
-                    onValueChange = { imageUrl = it },
-                    label = { Text("URL image") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-
-            // GENRES
+            // Genres
             item {
                 ExposedDropdownMenuBox(
                     expanded = genreMenuOpened,
@@ -164,11 +136,8 @@ fun EditMangaScreen(
                         readOnly = true,
                         label = { Text("Genres") },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = genreMenuOpened) },
-                        modifier = Modifier
-                            .menuAnchor()
-                            .fillMaxWidth()
+                        modifier = Modifier.menuAnchor().fillMaxWidth()
                     )
-
                     ExposedDropdownMenu(
                         expanded = genreMenuOpened,
                         onDismissRequest = { genreMenuOpened = false }
@@ -189,12 +158,45 @@ fun EditMangaScreen(
             }
 
             // ERROR
+            item { if (error != null) Text(error!!, color = MaterialTheme.colorScheme.error) }
+
+            // ---- Chapitres ----
             item {
-                if (error != null)
-                    Text(error!!, color = MaterialTheme.colorScheme.error)
+                OutlinedTextField(
+                    value = newChapterText,
+                    onValueChange = { newChapterText = it },
+                    label = { Text("Ajouter un chapitre") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Button(
+                    onClick = {
+                        vm.addChapter(newChapterText)
+                        newChapterText = ""
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) { Text("Ajouter le chapitre") }
             }
 
-            // BOUTON UPDATE
+            items(chapters.size) { index ->
+                val chapterUrl = chapters[index]
+                Column(
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+                ) {
+                    AsyncImage(
+                        model = chapterUrl,
+                        contentDescription = "Chapitre ${index + 1}",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(180.dp)
+                    )
+                    IconButton(onClick = { vm.removeChapter(index) }) {
+                        Icon(Icons.Default.Delete, contentDescription = "Supprimer")
+                    }
+                }
+            }
+
+
+            // Bouton Update
             item {
                 Button(
                     onClick = {
@@ -205,28 +207,23 @@ fun EditMangaScreen(
                             description = description,
                             date = date,
                             image = imageUrl,
-                            genresIds = selectedGenres
+                            genresIds = selectedGenres,
+                            chapters = chapters
                         )
                     },
                     enabled = !loading,
                     modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(if (loading) "Mise à jour..." else "Enregistrer")
-                }
+                ) { Text(if (loading) "Mise à jour..." else "Enregistrer") }
             }
 
-            // BOUTON SUPPRIMER
+            // Bouton Supprimer
             item {
                 Button(
                     onClick = { vm.delete(mangaId) },
                     enabled = !loading,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.error
-                    ),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
                     modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Supprimer", color = MaterialTheme.colorScheme.onError)
-                }
+                ) { Text("Supprimer", color = MaterialTheme.colorScheme.onError) }
             }
         }
     }

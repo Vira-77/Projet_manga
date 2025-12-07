@@ -166,7 +166,7 @@ exports.getMangaByName = async (nom, options = {}) => {
 //   MISE À JOUR D'UN MANGA
 // ==========================
 exports.updateManga = async (id, updateData) => {
-    const { nom, description, dateDeSortie, urlImage, auteur, genres } = updateData;
+    const { nom, description, dateDeSortie, urlImage, auteur, genres, chapitres  } = updateData;
     
     const manga = await Manga.findById(id);
     if (!manga) {
@@ -217,6 +217,8 @@ exports.updateManga = async (id, updateData) => {
     if (urlImage !== undefined) updateFields.urlImage = urlImage?.trim();
     if (auteur !== undefined) updateFields.auteur = auteur.trim();
     if (genres !== undefined) updateFields.genres = genres;
+    if (chapitres !== undefined) updateFields.chapitres = chapitres; // <- les URLs
+
 
     // Gestion des changements de genres
     if (genres !== undefined) {

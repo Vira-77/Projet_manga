@@ -27,11 +27,13 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mangaproject.data.api.RetrofitInstance
 import com.mangaproject.data.datastore.UserPreferences
+import com.mangaproject.data.local.DataStoreLocalStorage
 import com.mangaproject.data.repository.GenreRepository
 import com.mangaproject.data.repository.MangaRepository
 import com.mangaproject.data.repository.StoreRepository
@@ -56,7 +58,11 @@ fun HomeAdminManga(
     val api = remember(token) { RetrofitInstance.authedApiService(token) }
 
     // Repositories
-    val mangaRepo = remember(api) { MangaRepository(api) }
+    val context = LocalContext.current
+    val localStorage = remember { DataStoreLocalStorage(context) }
+    val mangaRepo = remember(api, localStorage) { MangaRepository(api, localStorage) }
+
+    //val mangaRepo = remember(api) { MangaRepository(api) }
     val genreRepo = remember(api) { GenreRepository(api) }
     val storeRepo = remember(api) { StoreRepository(api) }
     val userRepo = remember(api) { UserRepository(api,token) }

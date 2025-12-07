@@ -21,6 +21,9 @@ class EditMangaViewModel(
     private val _genres = MutableStateFlow<List<Genre>>(emptyList())
     val genres: StateFlow<List<Genre>> = _genres
 
+    private val _chapters = MutableStateFlow<List<String>>(emptyList())
+    val chapters: StateFlow<List<String>> = _chapters
+
     private val _loading = MutableStateFlow(false)
     val loading: StateFlow<Boolean> = _loading
 
@@ -33,15 +36,16 @@ class EditMangaViewModel(
     private val _deleteSuccess = MutableStateFlow(false)
     val deleteSuccess: StateFlow<Boolean> = _deleteSuccess
 
-
+    // -----------------------------
+    //   Chargement du manga
+    // -----------------------------
     fun load(mangaId: String) {
         viewModelScope.launch {
             try {
                 _loading.value = true
-
                 _manga.value = mangaRepo.getMangaById(mangaId)
                 _genres.value = genreRepo.getAllGenres()
-
+                _chapters.value = _manga.value?.chapitres ?: emptyList()
             } catch (e: Exception) {
                 _error.value = e.message
             } finally {
@@ -50,7 +54,28 @@ class EditMangaViewModel(
         }
     }
 
+    // -----------------------------
+    //   Gestion des chapitres
+    // -----------------------------
+    fun addChapter(url: String) {
+        if (url.isBlank()) {
+            _error.value = "Le lien du chapitre ne peut pas être vide"
+            return
+        }
+        val updated = _chapters.value.toMutableList()
+        updated.add(url)
+        _chapters.value = updated
+    }
 
+    fun removeChapter(index: Int) {
+        val updated = _chapters.value.toMutableList()
+        if (index in updated.indices) updated.removeAt(index)
+        _chapters.value = updated
+    }
+
+    // -----------------------------
+    //   Mise à jour du manga
+    // -----------------------------
     fun update(
         id: String,
         nom: String,
@@ -58,7 +83,8 @@ class EditMangaViewModel(
         description: String?,
         date: String?,
         image: String?,
-        genresIds: List<String>
+        genresIds: List<String>,
+        chapters: List<String>
     ) {
         viewModelScope.launch {
             try {
@@ -73,11 +99,11 @@ class EditMangaViewModel(
                     description = description,
                     date = date,
                     image = image,
-                    genres = genresIds
+                    genres = genresIds,
+                    chapters = chapters
                 )
 
                 _success.value = true
-
             } catch (e: Exception) {
                 _error.value = "Erreur : ${e.message}"
             } finally {
@@ -86,6 +112,9 @@ class EditMangaViewModel(
         }
     }
 
+    // -----------------------------
+    //   Suppression
+    // -----------------------------
     fun delete(id: String) {
         viewModelScope.launch {
             try {
@@ -94,7 +123,6 @@ class EditMangaViewModel(
                 _deleteSuccess.value = false
 
                 mangaRepo.deleteManga(id)
-
                 _deleteSuccess.value = true
             } catch (e: Exception) {
                 _error.value = "Erreur : ${e.message}"

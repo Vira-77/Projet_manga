@@ -12,7 +12,8 @@ data class Manga(
     val auteur: String,
     val genres: List<String>?,
     val jikanId: Int? = null,
-    val source: String? = null
+    val source: String? = null,
+    val chapitres: List<String>? = emptyList()
 )
 
 data class MangaUpdateRequest(
@@ -21,7 +22,8 @@ data class MangaUpdateRequest(
     val urlImage: String?,
     val dateDeSortie: String?,
     val auteur: String,
-    val genres: List<String>
+    val genres: List<String>,
+    val chapitres: List<String>? = emptyList()
 )
 
 data class MangaDetailResponse(

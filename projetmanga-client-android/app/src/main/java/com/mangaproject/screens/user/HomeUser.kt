@@ -11,10 +11,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.mangaproject.data.api.RetrofitInstance
 import com.mangaproject.data.datastore.UserPreferences
+import com.mangaproject.data.local.DataStoreLocalStorage
 import com.mangaproject.data.repository.MangaRepository
 import com.mangaproject.data.repository.ReadingHistoryRepository
 import com.mangaproject.data.repository.StoreRepository
@@ -47,8 +49,10 @@ fun HomeUser(
     }
 
 
-    val mangaRepo = remember(api){
-        MangaRepository(authedApi ?: api)
+    val context = LocalContext.current
+    val localStorage = remember { DataStoreLocalStorage(context) }
+    val mangaRepo = remember(api, localStorage)(api){
+        MangaRepository(authedApi ?: api, localStorage)
     }
     val storeRepo = remember(api) { StoreRepository(api) }
     val userRepo = remember(api) { UserRepository(api,token) }

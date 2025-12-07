@@ -9,8 +9,13 @@ import com.mangaproject.data.model.JikanManga
 import com.mangaproject.data.model.Manga
 import com.mangaproject.data.model.MangaUpdateRequest
 import retrofit2.Response
+import com.mangaproject.data.local.LocalStorage
+import com.mangaproject.data.model.*
 
-class MangaRepository(private val api: ApiService) {
+class MangaRepository(
+    private val api: ApiService,
+    private val local: LocalStorage
+) {
 
     suspend fun getLocalMangas(): List<Manga> {
         val response = api.getAllLocalMangas()
@@ -20,13 +25,26 @@ class MangaRepository(private val api: ApiService) {
     suspend fun getUserFavorites(userId: String): List<Manga> {
         return api.getUserFavorites(userId).favorites
     }
-    
-    suspend fun getFavorites(): List<Manga> {
+
+     suspend fun getFavorites(): List<Manga> {
         return api.getFavorites().favorites
     }
 
-    suspend fun getTrends(): List<JikanManga> {
-        return api.getTopMangas().top
+    suspend fun getTrends(forceRefresh: Boolean = false): List<JikanManga> {
+
+        // cache ?
+        val cached = local.loadTrending()
+        if (!forceRefresh && cached.isNotEmpty()) {
+            return cached
+        }
+
+        // sinon appelle l’API
+        val fresh = api.getTopMangas().top
+
+        // save
+        local.saveTrending(fresh)
+
+        return fresh
     }
 
     suspend fun searchMangaJikan(query: String): List<JikanManga> {
@@ -72,10 +90,11 @@ class MangaRepository(private val api: ApiService) {
         image: String?,
         date: String?,
         auteur: String,
-        genres: List<String>
+        genres: List<String>,
+        chapters: List<String>
     ) = api.updateManga(
         id,
-        MangaUpdateRequest(nom, description, image, date, auteur, genres)
+        MangaUpdateRequest(nom, description, image, date, auteur, genres, chapters)
     )
 
     suspend fun deleteManga(id: String) = api.deleteManga(id) // api.deleteMangaPost(id)
