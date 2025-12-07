@@ -4,8 +4,26 @@ const router = express.Router();
 // Importation des contrôleurs et middlewares
 const userController = require('../controllers/userController');
 const { verifyToken, authorizeRoles } = require('../middlewares/authMiddleware'); 
+const { upload } = require('../middlewares/upload');
 
 
+
+// Route pour uploader la photo de profil
+router.post(
+    '/profile/picture',
+    verifyToken,
+    authorizeRoles('admin', 'admin_manga', 'utilisateur'),
+    upload.single('profilePicture'), // 'profilePicture' = nom du champ
+    userController.uploadProfilePicture
+);
+
+// Route pour supprimer la photo de profil
+router.delete(
+    '/profile/picture',
+    verifyToken,
+    authorizeRoles('admin', 'admin_manga', 'utilisateur'),
+    userController.deleteProfilePicture
+);
 
 // Récupérer un utilisateur par ID
 router.get(
@@ -23,6 +41,7 @@ router.put(
     authorizeRoles('admin','admin_manga','utilisateur'), 
     userController.updateUserController
 );
+
 
 
 // ===================================

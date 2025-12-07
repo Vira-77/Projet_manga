@@ -1,8 +1,8 @@
 package com.mangaproject.screens.user
 
+import android.content.Context
 import android.net.Uri
 import android.util.Log
-import android.util.Log.e
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mangaproject.data.datastore.UserPreferences
@@ -61,43 +61,16 @@ class HomeViewModel(
     private val _selectedManga = MutableStateFlow<Manga?>(null)
     val selectedManga = _selectedManga.asStateFlow()
 
-    //private val _mangaChapters = MutableStateFlow<List<Chapter>>(emptyList())
-    //val mangaChapters = _mangaChapters.asStateFlow()
+    private val _uploadState = MutableStateFlow<UploadState>(UploadState.Idle)
+    val uploadState: StateFlow<UploadState> = _uploadState.asStateFlow()
+
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading = _isLoading.asStateFlow()
 
-    fun loadMangaDetails(mangaId: String) {
-        viewModelScope.launch {
-            _isLoading.value = true
-            try {
-                // Appel API pour récupérer les détails du manga
-                val response = mangaRepo.getMangaById(mangaId)
-                _selectedManga.value = response
-            } catch (e: Exception) {
-                Log.e("HomeViewModel", "Erreur lors du chargement du manga: ${e.message}")
-            } finally {
-                _isLoading.value = false
-            }
-        }
-    }
-
-    /*
-    fun loadMangaChapters(mangaId: String) {
-        viewModelScope.launch {
-            try {
-                // Appel API pour récupérer les chapitres du manga
-                val response = apiService.getChaptersByManga(mangaId)
-                _mangaChapters.value = response.chapters
-            } catch (e: Exception) {
-                Log.e("HomeViewModel", "Erreur lors du chargement des chapitres: ${e.message}")
-            }
-        }
-    }*/
 
 
-
-    fun updateSelectedProfilePictureUri(uri: Uri) {
+    fun updateSelectedProfilePictureUri(uri: Uri?) {
         _selectedProfilePictureUri.value = uri
     }
 
@@ -207,4 +180,57 @@ class HomeViewModel(
             try { _stores.value = storeRepo.getStores() } catch (_: Exception) {}
         }
     }
+
+    fun uploadProfilePicture(context: Context) {
+        val uri = _selectedProfilePictureUri.value
+        if (uri == null) {
+            _uploadState.value = UploadState.Error("Aucune image sélectionnée")
+            return
+        }
+
+        viewModelScope.launch {
+            _uploadState.value = UploadState.Loading
+
+            val result = userRepo.uploadProfilePicture(context, uri)
+
+            result.onSuccess { updatedUser ->
+                _user.value = updatedUser
+                _selectedProfilePictureUri.value = null // Réinitialiser la sélection
+                _uploadState.value = UploadState.Success("Photo de profil mise à jour")
+
+                // Recharger le profil complet
+                loadUser()
+            }.onFailure { error ->
+                _uploadState.value = UploadState.Error(error.message ?: "Erreur inconnue")
+                Log.e("HomeViewModel", "Error uploadProfilePicture(): ${error.message}")
+            }
+        }
+    }
+
+    fun deleteProfilePicture() {
+        viewModelScope.launch {
+            _uploadState.value = UploadState.Loading
+
+            val result = userRepo.deleteProfilePicture()
+
+            result.onSuccess { updatedUser ->
+                _user.value = updatedUser
+                _uploadState.value = UploadState.Success("Photo de profil supprimée")
+                loadUser()
+            }.onFailure { error ->
+                _uploadState.value = UploadState.Error(error.message ?: "Erreur inconnue")
+                Log.e("HomeViewModel", "Error deleteProfilePicture(): ${error.message}")
+            }
+        }
+    }
+
+    fun resetUploadState() {
+        _uploadState.value = UploadState.Idle
+    }
+}
+sealed class UploadState {
+    object Idle : UploadState()
+    object Loading : UploadState()
+    data class Success(val message: String) : UploadState()
+    data class Error(val message: String) : UploadState()
 }

@@ -12,3 +12,20 @@ data class User(
     val bio: String?,
     val profilePicture: String?
 )
+
+data class UploadProfilePictureResponse(
+    @SerializedName("message")
+    val message: String,
+
+    @SerializedName("user")
+    val user: User
+)
+
+
+data class UserResponse(
+    @SerializedName("message")
+    val message: String,
+
+    @SerializedName("user")
+    val user: User
+)

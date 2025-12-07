@@ -59,7 +59,7 @@ fun HomeAdminManga(
     val mangaRepo = remember(api) { MangaRepository(api) }
     val genreRepo = remember(api) { GenreRepository(api) }
     val storeRepo = remember(api) { StoreRepository(api) }
-    val userRepo = remember(api) { UserRepository(api) }
+    val userRepo = remember(api) { UserRepository(api,token) }
 
     // ViewModel partagé pour les onglets "user lambda"
     val homeVm: HomeViewModel = viewModel(

@@ -35,7 +35,7 @@ fun HomeUser(
 
     val mangaRepo = remember(api) { MangaRepository(api) }
     val storeRepo = remember(api) { StoreRepository(api) }
-    val userRepo = remember(api) { UserRepository(api) }
+    val userRepo = remember(api) { UserRepository(api,token) }
 
 
     val vm: HomeViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
