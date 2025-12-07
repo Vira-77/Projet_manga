@@ -27,16 +27,13 @@ android {
             )
         }
     }
-
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-
     kotlinOptions {
         jvmTarget = "11"
     }
-
     buildFeatures {
         compose = true
     }
@@ -70,4 +67,17 @@ dependencies {
     // MapLibre
     implementation("org.maplibre.gl:android-sdk:12.2.1")
     implementation(libs.play.services.maps)
+}
+
+    implementation("androidx.navigation:navigation-compose:2.7.7")
+
+    // Socket.io client
+    implementation("io.socket:socket.io-client:2.1.1")
+
+    // Notifications Android
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
+    implementation("androidx.core:core-ktx:1.13.1")
+
+    // Lifecycle pour les services
+    implementation("androidx.lifecycle:lifecycle-service:2.7.0")
 }

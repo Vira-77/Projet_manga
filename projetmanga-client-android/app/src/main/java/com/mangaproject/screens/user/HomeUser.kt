@@ -1,14 +1,11 @@
 package com.mangaproject.screens.user
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.mangaproject.data.api.RetrofitInstance
@@ -16,9 +13,6 @@ import com.mangaproject.data.datastore.UserPreferences
 import com.mangaproject.data.repository.MangaRepository
 import com.mangaproject.data.repository.StoreRepository
 import com.mangaproject.ui.tabs.UserTab
-import com.mangaproject.ui.component.FloatingChatBubble
-
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -29,12 +23,27 @@ fun HomeUser(
 ) {
 
     val api = remember { RetrofitInstance.apiService }
+    val token by prefs.token.collectAsState(initial = "")
 
-    val mangaRepo = remember { MangaRepository(api) }
+    // Utiliser l'API authentifiée pour les favoris
+    val authedApi = remember(token) {
+        if (token.isNotBlank()) {
+            RetrofitInstance.authedApiService(token)
+        } else null
+    }
+
+    val mangaRepo = remember(authedApi) {
+        MangaRepository(authedApi ?: api)
+    }
     val storeRepo = remember { StoreRepository(api) }
+    val readingHistoryRepo = remember(token) {
+        if (token.isNotBlank()) {
+            ReadingHistoryRepository(RetrofitInstance.authedApiService(token))
+        } else null
+    }
 
     val vm: HomeViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
-        factory = HomeViewModelFactory(mangaRepo, storeRepo, prefs)
+        factory = HomeViewModelFactory(mangaRepo, storeRepo, prefs, readingHistoryRepo)
     )
 
     val tabs = listOf(
@@ -42,12 +51,12 @@ fun HomeUser(
         UserTab.Favorites,
         UserTab.Tendances,
         UserTab.Communautes,
-        UserTab.Magasins
+        UserTab.Magasins,
+        UserTab.History
     )
 
     var selectedTab by remember { mutableIntStateOf(0) }
 
-    // 🟦 IMPORTANT : on englobe tout le contenu dans un Box
     Box(modifier = Modifier.fillMaxSize()) {
 
         Scaffold(
@@ -88,11 +97,13 @@ fun HomeUser(
                 })
                 UserTab.Communautes -> ScreenCommunautes(vm, modifier)
                 UserTab.Magasins -> ScreenMagasins(vm,navController, modifier)
+                UserTab.History -> ScreenHistory(vm, modifier, onOpen = { id ->
+                    navController.navigate("manga_detail/$id")
+                })
             }
 
-        }
 
-        // 🟡 LA bulle IA – maintenant AU-DESSUS de tout
+        //LA bulle IA – maintenant au-dessus de tout
         FloatingChatBubble(
             modifier = Modifier
                 .align(Alignment.BottomEnd)

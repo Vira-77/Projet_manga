@@ -45,24 +45,8 @@ function notifyMangaStatus(mangaId, statusPayload) {
   }
 }
 
-// Notification: nouveau commentaire sur un manga
-function notifyNewComment(mangaId, comment) {
-  try {
-    const io = getIo();
-    const room = `manga:${mangaId}`;
-
-    io.to(room).emit('comment:new', {
-      mangaId,
-      comment,
-    });
-  } catch (err) {
-    console.error('Erreur émission notif commentaire:', err.message);
-  }
-}
-
 module.exports = {
   notifyNewChapter,
   notifyChapterUpdated,
   notifyMangaStatus,
-  notifyNewComment,
 };
