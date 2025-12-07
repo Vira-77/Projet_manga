@@ -1,7 +1,6 @@
 package com.mangaproject.ui.login
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -10,8 +9,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -35,166 +32,110 @@ fun LoginScreen(
         onSuccess()
     }
 
-    // ✅ Fond avec dégradé noir/rouge
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        Color(0xFF8B0000), // Rouge foncé en haut
-                        Color(0xFF000000), // Noir au milieu
-                        Color(0xFF8B0000)  // Rouge foncé en bas
-                    )
-                )
-            )
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
-        Column(
+
+        // Logo
+        Image(
+            painter = painterResource(id = R.drawable.logo_manga_corp),
+            contentDescription = "Logo MangaCorp",
             modifier = Modifier
-                .fillMaxSize()
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+                .size(180.dp)
+                .clip(CircleShape)
+                .border(4.dp, MaterialTheme.colorScheme.primary, CircleShape),
+            contentScale = ContentScale.Crop
+        )
+        Spacer(Modifier.height(16.dp))
+
+        // Titre de l'application
+        Text(
+            text = "MangaCorp",
+            style = MaterialTheme.typography.displayMedium.copy(
+                fontWeight = FontWeight.Bold,
+                fontSize = 48.sp,
+                letterSpacing = 2.sp
+            ),
+            color = MaterialTheme.colorScheme.onSurface
+        )
+
+        Text(
+            text = "Votre bibliothèque manga",
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        Spacer(Modifier.height(48.dp))
+
+        // Champ Email
+        OutlinedTextField(
+            value = email,
+            onValueChange = { email = it },
+            label = { Text("Email") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
+        )
+
+        Spacer(Modifier.height(12.dp))
+
+        // Champ Mot de passe
+        OutlinedTextField(
+            value = password,
+            onValueChange = { password = it },
+            label = { Text("Mot de passe") },
+            visualTransformation = PasswordVisualTransformation(),
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
+        )
+
+        Spacer(Modifier.height(24.dp))
+
+        // Bouton de connexion
+        Button(
+            onClick = { viewModel.login(email, password) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
+            enabled = !state.isLoading
         ) {
-
-            // ✅ Logo
-            Image(
-                painter = painterResource(id = R.drawable.logo_manga_corp),
-                contentDescription = "Logo MangaCorp",
-                modifier = Modifier
-                    .size(180.dp)
-                    .clip(CircleShape)
-                    .border(4.dp, Color(0xFFFF4444), CircleShape),
-                contentScale = ContentScale.Crop
-            )
-            Spacer(Modifier.height(16.dp))
-
-            // ✅ Titre de l'application
             Text(
-                text = "MangaCorp",
-                style = MaterialTheme.typography.displayMedium.copy(
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 48.sp,
-                    color = Color.White,
-                    letterSpacing = 2.sp
-                )
+                text = "Se connecter",
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp
             )
+        }
 
-            Text(
-                text = "Votre bibliothèque manga",
-                style = MaterialTheme.typography.bodyLarge.copy(
-                    color = Color(0xFFFF4444), // Rouge vif
-                    fontWeight = FontWeight.Light
-                )
-            )
+        Spacer(Modifier.height(16.dp))
 
-            Spacer(Modifier.height(48.dp))
+        // Bouton créer un compte
+        TextButton(onClick = onGoToRegister) {
+            Text("Créer un compte")
+        }
 
-            // ✅ Champ Email avec style sombre
-            OutlinedTextField(
-                value = email,
-                onValueChange = { email = it },
-                label = { Text("Email") },
-                modifier = Modifier.fillMaxWidth(),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = Color.White,
-                    unfocusedTextColor = Color.White,
-                    focusedBorderColor = Color(0xFFFF4444),
-                    unfocusedBorderColor = Color.Gray,
-                    focusedLabelColor = Color(0xFFFF4444),
-                    unfocusedLabelColor = Color.Gray,
-                    cursorColor = Color(0xFFFF4444)
-                )
-            )
+        Spacer(Modifier.height(16.dp))
 
+        // Indicateur de chargement
+        if (state.isLoading) {
+            CircularProgressIndicator()
+        }
+
+        // Message d'erreur
+        state.error?.let {
             Spacer(Modifier.height(12.dp))
-
-            // ✅ Champ Mot de passe avec style sombre
-            OutlinedTextField(
-                value = password,
-                onValueChange = { password = it },
-                label = { Text("Mot de passe") },
-                visualTransformation = PasswordVisualTransformation(),
-                modifier = Modifier.fillMaxWidth(),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = Color.White,
-                    unfocusedTextColor = Color.White,
-                    focusedBorderColor = Color(0xFFFF4444),
-                    unfocusedBorderColor = Color.Gray,
-                    focusedLabelColor = Color(0xFFFF4444),
-                    unfocusedLabelColor = Color.Gray,
-                    cursorColor = Color(0xFFFF4444)
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.errorContainer
                 )
-            )
-
-            Spacer(Modifier.height(24.dp))
-
-            // ✅ Bouton de connexion avec dégradé
-            Button(
-                onClick = { viewModel.login(email, password) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Transparent
-                ),
-                contentPadding = PaddingValues(0.dp)
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(
-                            Brush.horizontalGradient(
-                                colors = listOf(
-                                    Color(0xFFFF0000),
-                                    Color(0xFFCC0000)
-                                )
-                            )
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "Se connecter",
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp
-                    )
-                }
-            }
-
-            Spacer(Modifier.height(16.dp))
-
-            // ✅ Bouton créer un compte
-            TextButton(onClick = onGoToRegister) {
                 Text(
-                    text = "Créer un compte",
-                    color = Color(0xFFFF6666)
+                    text = it,
+                    color = MaterialTheme.colorScheme.onErrorContainer,
+                    modifier = Modifier.padding(16.dp)
                 )
-            }
-
-            Spacer(Modifier.height(16.dp))
-
-            // ✅ Indicateur de chargement
-            if (state.isLoading) {
-                CircularProgressIndicator(
-                    color = Color(0xFFFF4444)
-                )
-            }
-
-            // ✅ Message d'erreur
-            state.error?.let {
-                Spacer(Modifier.height(12.dp))
-                Card(
-                    colors = CardDefaults.cardColors(
-                        containerColor = Color(0xFFFF4444).copy(alpha = 0.2f)
-                    )
-                ) {
-                    Text(
-                        text = it,
-                        color = Color(0xFFFF6666),
-                        modifier = Modifier.padding(16.dp)
-                    )
-                }
             }
         }
     }
