@@ -16,9 +16,9 @@ object RetrofitInstance {
 
     private fun baseClient(): OkHttpClient =
         OkHttpClient.Builder()
-            .connectTimeout(15, TimeUnit.SECONDS)
-            .readTimeout(15, TimeUnit.SECONDS)
-            .writeTimeout(15, TimeUnit.SECONDS)
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(90, TimeUnit.SECONDS)
+            .writeTimeout(90, TimeUnit.SECONDS)
             .build()
 
     private fun buildRetrofit(client: OkHttpClient): Retrofit =

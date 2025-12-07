@@ -10,7 +10,9 @@ data class Manga(
     val dateDeSortie: String?,
     val urlImage: String?,
     val auteur: String,
-    val genres: List<String>?
+    val genres: List<String>?,
+    val jikanId: Int? = null,
+    val source: String? = null
 )
 
 data class MangaUpdateRequest(

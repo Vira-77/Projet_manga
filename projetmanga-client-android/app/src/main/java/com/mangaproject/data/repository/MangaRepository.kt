@@ -20,6 +20,10 @@ class MangaRepository(private val api: ApiService) {
     suspend fun getUserFavorites(userId: String): List<Manga> {
         return api.getUserFavorites(userId).favorites
     }
+    
+    suspend fun getFavorites(): List<Manga> {
+        return api.getFavorites().favorites
+    }
 
     suspend fun getTrends(): List<JikanManga> {
         return api.getTopMangas().top

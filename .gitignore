@@ -152,6 +152,8 @@ projetmanga-client-android/local.properties
 
 # IDE - IntelliJ IDEA / WebStorm
 .idea/
+projetmanga-client-android/.idea
+projetmanga-client-android/.kotlin
 
 # Environment variables (garder .env mais ignorer les variantes)
 .env.local

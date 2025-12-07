@@ -9,9 +9,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 
 @Composable
-fun ScreenMagasins(vm: HomeViewModel, modifier: Modifier = Modifier) {
+fun ScreenMagasins(
+    vm: HomeViewModel,
+    navController: NavHostController,
+    modifier: Modifier = Modifier
+) {
 
     val stores by vm.stores.collectAsState()
 
@@ -37,6 +42,7 @@ fun ScreenMagasins(vm: HomeViewModel, modifier: Modifier = Modifier) {
 
                     Column(modifier = Modifier.padding(16.dp)) {
 
+                        // NOM
                         Text(
                             text = store.nom,
                             style = MaterialTheme.typography.titleMedium
@@ -44,23 +50,27 @@ fun ScreenMagasins(vm: HomeViewModel, modifier: Modifier = Modifier) {
 
                         Spacer(modifier = Modifier.height(6.dp))
 
+                        // ADRESSE
                         store.adresse?.let {
                             Text("📍 $it", style = MaterialTheme.typography.bodyMedium)
                         }
 
+                        // TELEPHONE
                         store.telephone?.let {
                             Text("📞 $it", style = MaterialTheme.typography.bodyMedium)
                         }
 
+                        // EMAIL
                         store.email?.let {
                             Text("✉️ $it", style = MaterialTheme.typography.bodyMedium)
                         }
 
                         Spacer(modifier = Modifier.height(10.dp))
 
+                        // BOUTON MAP
                         Button(
                             onClick = {
-                                println("🗺 Map = ${store.position.coordinates}")
+                                navController.navigate("map_stores")
                             },
                             modifier = Modifier.fillMaxWidth()
                         ) {

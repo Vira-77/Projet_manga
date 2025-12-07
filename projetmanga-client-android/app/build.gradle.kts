@@ -6,9 +6,7 @@ plugins {
 
 android {
     namespace = "com.mangaproject"
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.mangaproject"
@@ -58,17 +56,37 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+    implementation("androidx.compose.material:material-icons-extended:1.6.0")
+    implementation("com.google.android.gms:play-services-location:21.3.0")
+    implementation("com.google.accompanist:accompanist-permissions:0.34.0")
+
+    // Networking
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
     implementation("com.squareup.retrofit2:converter-gson:2.11.0")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+
+    // Navigation + Data
     implementation("androidx.navigation:navigation-compose:2.8.0")
     implementation("androidx.datastore:datastore-preferences:1.1.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
     implementation("io.coil-kt:coil-compose:2.6.0")
+
+    // MapLibre
+    implementation("org.maplibre.gl:android-sdk:12.2.1")
+    implementation(libs.play.services.maps)
+
+
     implementation("androidx.navigation:navigation-compose:2.7.7")
     implementation("androidx.compose.material:material-icons-extended")
 
+    // Socket.io client
+    implementation("io.socket:socket.io-client:2.1.1")
 
+    // Notifications Android
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
+    implementation("androidx.core:core-ktx:1.13.1")
 
+    // Lifecycle pour les services
+    implementation("androidx.lifecycle:lifecycle-service:2.7.0")
 }

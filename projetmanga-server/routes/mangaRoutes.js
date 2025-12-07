@@ -23,6 +23,7 @@ router.get('/genre/:genreId', mangaController.getMangasByGenre);
 // Récupérer les mangas d'un auteur
 router.get('/author/:author', mangaController.getMangasByAuthor);
 
+// IMPORTANT: La route générique /:id doit être EN DERNIER pour éviter les conflits
 // Récupérer un manga par ID
 router.get('/:id', mangaController.getMangaById);
 

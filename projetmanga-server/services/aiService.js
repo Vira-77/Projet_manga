@@ -6,15 +6,26 @@ let history = [];
 async function chatWithAI(userMessage) {
     const catalogue = await loadCatalogue();
 
+    // Sécurisation des genres même si ce sont des ObjectId non populés
+    const formattedCatalogue = catalogue
+        .map(m => {
+            const genreNames = Array.isArray(m.genres)
+                ? m.genres.map(g => typeof g === "string" ? g : g?.name || "Inconnu")
+                : [];
+
+            return `- ${m.title} (${genreNames.join(", ")})`;
+        })
+        .join("\n");
+
     const rules = `
 Tu es une IA experte en manga.
-Il est INTERDIT proposer une œuvre non listée dans le catalogue ou d'inventer une oeuvre.
-Si rien n’est pertinent, ou si le catalogue est vide dis-le clairement.
-Réponds de manière naturelle et friendly.
-la reponse ne doit pas depasser 200 caracteres.
-voici le
-Catalogue (obligatoire) :
-${catalogue.map(m => `- ${m.title} (${m.genres.join(", ")})`).join("\n")}
+❌ Interdit d'inventer un manga.
+❌ Interdit de proposer un manga hors catalogue.
+✔ Réponds de manière naturelle et amicale.
+✔ Maximum 200 caractères.
+
+Catalogue :
+${formattedCatalogue}
 `;
 
     const prompt = `
@@ -24,20 +35,26 @@ Historique :
 ${history.map(h => `${h.role}: ${h.content}`).join("\n")}
 
 Utilisateur : ${userMessage}
- IA :
+IA :
 `;
 
-    const response = await axios.post(
-        `${process.env.OLLAMA_URL}/api/generate`,
-        { model: "mistral", prompt, stream: false }
-    );
+    try {
+        const response = await axios.post(
+            `${process.env.OLLAMA_URL}/api/generate`,
+            { model: "mistral", prompt, stream: false }
+        );
 
-    const aiText = response.data.response.trim();
+        const aiText = response.data.response.trim();
 
-    history.push({ role: "user", content: userMessage });
-    history.push({ role: "assistant", content: aiText });
+        history.push({ role: "user", content: userMessage });
+        history.push({ role: "assistant", content: aiText });
 
-    return aiText;
+        return aiText;
+
+    } catch (err) {
+        console.error("Erreur IA :", err);
+        return "Je n'arrive pas à répondre pour le moment. Réessaie !";
+    }
 }
 
 module.exports = { chatWithAI };
