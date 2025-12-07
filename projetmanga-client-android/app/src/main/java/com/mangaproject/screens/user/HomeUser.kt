@@ -1,12 +1,14 @@
 package com.mangaproject.screens.user
 
 import androidx.compose.foundation.layout.Box
+import android.util.Log
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -17,6 +19,7 @@ import com.mangaproject.data.repository.MangaRepository
 import com.mangaproject.data.repository.ReadingHistoryRepository
 import com.mangaproject.data.repository.StoreRepository
 import com.mangaproject.ui.component.FloatingChatBubble
+import com.mangaproject.data.repository.UserRepository
 import com.mangaproject.ui.tabs.UserTab
 
 
@@ -28,9 +31,14 @@ fun HomeUser(
     logout: () -> Unit = {}
 ) {
 
-    val api = remember { RetrofitInstance.apiService }
-    val token by prefs.token.collectAsState(initial = "")
 
+    val token by prefs.token.collectAsState(initial = "")
+    if (token.isBlank()) {
+        Text("Chargement...", modifier = Modifier.padding(16.dp))
+        return
+    }
+
+    val api = remember { RetrofitInstance.authedApiService(token) }
     // Utiliser l'API authentifiée pour les favoris
     val authedApi = remember(token) {
         if (token.isNotBlank()) {
@@ -38,10 +46,13 @@ fun HomeUser(
         } else null
     }
 
-    val mangaRepo = remember(authedApi) {
+
+    val mangaRepo = remember(api){
         MangaRepository(authedApi ?: api)
     }
-    val storeRepo = remember { StoreRepository(api) }
+    val storeRepo = remember(api) { StoreRepository(api) }
+    val userRepo = remember(api) { UserRepository(api,token) }
+
     val readingHistoryRepo = remember(token) {
         if (token.isNotBlank()) {
             ReadingHistoryRepository(RetrofitInstance.authedApiService(token))
@@ -49,8 +60,9 @@ fun HomeUser(
     }
 
     val vm: HomeViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
-        factory = HomeViewModelFactory(mangaRepo, storeRepo, prefs, readingHistoryRepo)
+        factory = HomeViewModelFactory(mangaRepo, storeRepo,userRepo, prefs, readingHistoryRepo)
     )
+
 
     val tabs = listOf(
         UserTab.Home,
@@ -58,10 +70,11 @@ fun HomeUser(
         UserTab.Tendances,
         UserTab.Communautes,
         UserTab.Magasins,
-        UserTab.History
+        UserTab.History,
+        UserTab.Profil
     )
 
-    var selectedTab by remember { mutableIntStateOf(0) }
+    var selectedTab by rememberSaveable { mutableIntStateOf(0) }
 
     Box(modifier = Modifier.fillMaxSize()) {
 
@@ -102,8 +115,11 @@ fun HomeUser(
                     navController.navigate("manga_detail/$id")
                 })
 
-                UserTab.Communautes -> ScreenCommunautes(vm, modifier)
+                UserTab.Communautes -> ScreenCommunautes(vm, modifier,onMangaClick = { mangaId ->
+                navController.navigate("manga_detail_communaute/$mangaId")
+            })
                 UserTab.Magasins -> ScreenMagasins(vm, navController, modifier)
+            UserTab.Profil -> ScreenProfile(vm,modifier)
                 UserTab.History -> ScreenHistory(vm, modifier, onOpen = { id ->
                     navController.navigate("manga_detail/$id")
                 })

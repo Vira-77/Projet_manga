@@ -19,4 +19,6 @@ sealed class AdminMangaTab(
     object Magasins : AdminMangaTab("Magasins", Icons.Filled.ShoppingCart)
     object CreateManga : AdminMangaTab("Créer manga", Icons.Filled.Add)
     object MyMangas : AdminMangaTab("Mes mangas", Icons.Filled.Edit)
+
+    object Profil: AdminMangaTab("Profil",Icons.Default.AccountCircle)
 }

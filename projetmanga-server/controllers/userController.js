@@ -1,6 +1,100 @@
 const userService = require('../services/userService');
+const { deleteImage } = require('../middlewares/upload');
+const User = require('../models/User');
 
-// 
+exports.uploadProfilePicture = async (req, res) => {
+    try {
+
+        console.log('📸 Upload demandé');
+        console.log('🔑 req.user:', req.user);
+        console.log('📦 req.file:', req.file);
+        console.log('🎫 Authorization header:', req.headers['authorization']);
+        if (!req.file) {
+            return res.status(400).json({ message: 'Aucun fichier envoyé' });
+        }
+
+        const userId = req.user.id;
+        
+        // Construire le chemin relatif (stocké en BDD)
+        const relativePath = `/uploads/profiles/${req.file.filename}`;
+
+        const user = await User.findById(userId);
+        
+        if (!user) {
+            // Supprimer le fichier uploadé si l'utilisateur n'existe pas
+            deleteImage(relativePath);
+            return res.status(404).json({ message: 'Utilisateur non trouvé' });
+        }
+
+        // Supprimer l'ancienne photo si elle existe
+        if (user.profilePicture) {
+            deleteImage(user.profilePicture);
+        }
+
+        //  Mettre à jour avec le chemin relatif
+        user.profilePicture = relativePath;
+        await user.save();
+
+        console.log(`Photo de profil mise à jour: ${relativePath}`);
+
+        res.status(200).json({
+            message: 'Photo de profil mise à jour avec succès',
+            profilePicture: relativePath,
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                profilePicture: user.profilePicture
+            }
+        });
+
+    } catch (err) {
+        console.error('Erreur upload photo de profil:', err);
+        
+        // Supprimer le fichier en cas d'erreur
+        if (req.file) {
+            deleteImage(`/uploads/profiles/${req.file.filename}`);
+        }
+        
+        res.status(500).json({ 
+            message: 'Erreur interne du serveur',
+            error: err.message 
+        });
+    }
+};
+
+exports.deleteProfilePicture = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const user = await User.findById(userId).select('-password');
+
+        if (!user) {
+            return res.status(404).json({ message: 'Utilisateur non trouvé' });
+        }
+
+        if (user.profilePicture) {
+            deleteImage(user.profilePicture);
+            user.profilePicture = null;
+            await user.save();
+        }
+
+        res.status(200).json({
+            message: 'Photo de profil supprimée',
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                profilePicture: user.profilePicture,
+                bio: user.bio
+            }
+        });
+
+    } catch (err) {
+        console.error('❌ Erreur suppression photo:', err);
+        res.status(500).json({ message: 'Erreur interne du serveur' });
+    }
+};
+
 
 // POST /users
 const createUserController = async (req, res) => {
@@ -85,5 +179,7 @@ module.exports = {
     getAllUsersController,
     getUserByIdController,
     updateUserController,
-    deleteUserController
+    deleteUserController,
+    uploadProfilePicture: exports.uploadProfilePicture, 
+    deleteProfilePicture: exports.deleteProfilePicture
 };

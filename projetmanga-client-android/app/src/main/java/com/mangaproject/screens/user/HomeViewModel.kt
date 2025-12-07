@@ -1,7 +1,8 @@
 package com.mangaproject.screens.user
 
+import android.content.Context
+import android.net.Uri
 import android.util.Log
-import android.util.Log.e
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mangaproject.data.api.RetrofitInstance
@@ -11,12 +12,14 @@ import com.mangaproject.data.repository.FavoriteRepository
 import com.mangaproject.data.repository.MangaRepository
 import com.mangaproject.data.repository.ReadingHistoryRepository
 import com.mangaproject.data.repository.StoreRepository
+import com.mangaproject.data.repository.UserRepository
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class HomeViewModel(
     private val mangaRepo: MangaRepository,
     private val storeRepo: StoreRepository,
+    private val userRepo: UserRepository,
     private val prefs: UserPreferences,
     private val readingHistoryRepo: ReadingHistoryRepository? = null
 ) : ViewModel() {
@@ -53,9 +56,36 @@ class HomeViewModel(
     private val _searchLoading = MutableStateFlow(false)
     val searchLoading = _searchLoading.asStateFlow()
 
+    // USER INFO
+    private val _user = MutableStateFlow<User?>(null)
+    val user: StateFlow<User?> = _user.asStateFlow()
+
+    private val _selectedProfilePictureUri = MutableStateFlow<Uri?>(null)
+    val selectedProfilePictureUri: StateFlow<Uri?> = _selectedProfilePictureUri
+
+
+    // manga
+
+    private val _selectedManga = MutableStateFlow<Manga?>(null)
+    val selectedManga = _selectedManga.asStateFlow()
+
+    private val _uploadState = MutableStateFlow<UploadState>(UploadState.Idle)
+    val uploadState: StateFlow<UploadState> = _uploadState.asStateFlow()
+
+
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading = _isLoading.asStateFlow()
+
+
+
+    fun updateSelectedProfilePictureUri(uri: Uri?) {
+        _selectedProfilePictureUri.value = uri
+    }
+
     init {
         refresh()
         loadGenres()
+        loadUser()
         loadReadingHistory()
     }
 
@@ -133,6 +163,41 @@ class HomeViewModel(
                 println("⚠️ Error searchByGenre(): ${e.message}")
             }
             _searchLoading.value = false
+        }
+    }
+
+    // obtenir information sur l'utilisateur connecté
+    fun loadUser() {
+        viewModelScope.launch {
+            try {
+
+                val userId = prefs.userId.firstOrNull() // get userId from DataStore
+                if (!userId.isNullOrEmpty()) {
+                    val userData = userRepo.getUser(userId) // call repository suspend function
+                    _user.value = userData
+                }
+            } catch (e: Exception) {
+                Log.e("HomeViewModel", "Error loadUser(): ${e.message}")
+            }
+        }
+    }
+
+    fun updateUser(
+        id: String,
+        name: String?,
+        address: String?,
+        bio: String?,
+        profilePicture: String?
+    ) {
+        viewModelScope.launch {
+            userRepo.updateUser(
+                id = id,
+                name = name,
+                address = address,
+                bio = bio,
+                profilePicture = profilePicture
+            )
+            loadUser()
         }
     }
 
@@ -237,4 +302,113 @@ class HomeViewModel(
             (it.jikanId != null && it.jikanId.toString() == mangaId)
         }
     }
+
+    fun uploadProfilePicture(context: Context) {
+        val uri = _selectedProfilePictureUri.value
+        if (uri == null) {
+            _uploadState.value = UploadState.Error("Aucune image sélectionnée")
+            return
+        }
+
+        viewModelScope.launch {
+            _uploadState.value = UploadState.Loading
+
+            val result = userRepo.uploadProfilePicture(context, uri)
+
+            result.onSuccess { updatedUser ->
+                _user.value = updatedUser
+                _selectedProfilePictureUri.value = null // Réinitialiser la sélection
+                _uploadState.value = UploadState.Success("Photo de profil mise à jour")
+
+                // Recharger le profil complet
+                loadUser()
+            }.onFailure { error ->
+                _uploadState.value = UploadState.Error(error.message ?: "Erreur inconnue")
+                Log.e("HomeViewModel", "Error uploadProfilePicture(): ${error.message}")
+            }
+        }
+    }
+
+    fun deleteProfilePicture() {
+        viewModelScope.launch {
+            _uploadState.value = UploadState.Loading
+
+            val result = userRepo.deleteProfilePicture()
+
+            result.onSuccess { updatedUser ->
+                _user.value = updatedUser
+                _uploadState.value = UploadState.Success("Photo de profil supprimée")
+                loadUser()
+            }.onFailure { error ->
+                _uploadState.value = UploadState.Error(error.message ?: "Erreur inconnue")
+                Log.e("HomeViewModel", "Error deleteProfilePicture(): ${error.message}")
+            }
+        }
+    }
+
+    fun resetUploadState() {
+        _uploadState.value = UploadState.Idle
+    }
+
+    // Dans HomeViewModel, ajouter une méthode unifiée
+    fun saveProfile(
+        context: Context,
+        userId: String,
+        name: String?,
+        address: String?,
+        bio: String?,
+        hasImageToUpload: Boolean
+    ) {
+        viewModelScope.launch {
+            try {
+                _uploadState.value = UploadState.Loading
+
+                // 1. Upload image si nécessaire
+                if (hasImageToUpload && _selectedProfilePictureUri.value != null) {
+                    Log.d("HomeViewModel", "📸 Upload image...")
+                    val uploadResult = userRepo.uploadProfilePicture(
+                        context,
+                        _selectedProfilePictureUri.value!!
+                    )
+
+                    if (uploadResult.isFailure) {
+                        _uploadState.value = UploadState.Error(
+                            uploadResult.exceptionOrNull()?.message ?: "Erreur upload"
+                        )
+                        return@launch
+                    }
+
+                    _selectedProfilePictureUri.value = null
+                    Log.d("HomeViewModel", "✅ Image uploadée")
+                }
+
+                // 2. Mise à jour des autres champs
+                Log.d("HomeViewModel", "💾 Mise à jour profil...")
+                userRepo.updateUser(
+                    id = userId,
+                    name = name,
+                    address = address,
+                    bio = bio,
+                    profilePicture = null
+                )
+
+                // 3. Recharger
+                loadUser()
+
+                _uploadState.value = UploadState.Success("Profil mis à jour avec succès")
+
+            } catch (e: Exception) {
+                Log.e("HomeViewModel", "❌ Erreur saveProfile", e)
+                _uploadState.value = UploadState.Error(e.message ?: "Erreur inconnue")
+            }
+        }
+    }
+}
+
+
+sealed class UploadState {
+    object Idle : UploadState()
+    object Loading : UploadState()
+    data class Success(val message: String) : UploadState()
+    data class Error(val message: String) : UploadState()
 }

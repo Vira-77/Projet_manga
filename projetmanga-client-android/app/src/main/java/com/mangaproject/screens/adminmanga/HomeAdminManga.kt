@@ -22,7 +22,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -32,8 +35,10 @@ import com.mangaproject.data.datastore.UserPreferences
 import com.mangaproject.data.repository.GenreRepository
 import com.mangaproject.data.repository.MangaRepository
 import com.mangaproject.data.repository.StoreRepository
+import com.mangaproject.data.repository.UserRepository
 import com.mangaproject.screens.user.*
 import com.mangaproject.ui.tabs.AdminMangaTab
+import com.mangaproject.ui.tabs.UserTab
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,16 +49,21 @@ fun HomeAdminManga(
 ) {
     // Token & API authentifiée
     val token by prefs.token.collectAsState(initial = "")
+    if (token.isBlank()) {
+        Text("Chargement...", modifier = Modifier.padding(16.dp))
+        return
+    }
     val api = remember(token) { RetrofitInstance.authedApiService(token) }
 
     // Repositories
     val mangaRepo = remember(api) { MangaRepository(api) }
     val genreRepo = remember(api) { GenreRepository(api) }
     val storeRepo = remember(api) { StoreRepository(api) }
+    val userRepo = remember(api) { UserRepository(api,token) }
 
     // ViewModel partagé pour les onglets "user lambda"
     val homeVm: HomeViewModel = viewModel(
-        factory = HomeViewModelFactory(mangaRepo, storeRepo, prefs)
+        factory = HomeViewModelFactory(mangaRepo, storeRepo,userRepo,prefs)
     )
 
     // ViewModel pour la liste des mangas (Mes mangas)
@@ -68,10 +78,11 @@ fun HomeAdminManga(
         AdminMangaTab.Communautes,
         AdminMangaTab.Magasins,
         AdminMangaTab.CreateManga,
-        AdminMangaTab.MyMangas
+        AdminMangaTab.MyMangas,
+        AdminMangaTab.Profil
     )
 
-    var selectedTab by remember { mutableIntStateOf(0) }
+    var selectedTab by rememberSaveable { mutableIntStateOf(0) }
 
     Scaffold(
         topBar = {
@@ -121,7 +132,9 @@ fun HomeAdminManga(
                 )
 
             AdminMangaTab.Communautes ->
-                ScreenCommunautes(homeVm, modifier)
+                ScreenCommunautes(homeVm, modifier,onMangaClick = { mangaId ->
+                    navController.navigate("manga_detail_communaute/$mangaId")
+                })
 
             AdminMangaTab.Magasins ->
                 ScreenMagasins(homeVm, navController, modifier)
@@ -146,6 +159,8 @@ fun HomeAdminManga(
                         navController.navigate("edit_manga/$id")
                     }
                 )
+
+            AdminMangaTab.Profil -> ScreenProfile(homeVm,modifier)
         }
     }
 }

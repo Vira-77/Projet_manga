@@ -1,9 +1,10 @@
 package com.mangaproject.data.api
 
 import com.mangaproject.data.model.AddFavoriteRequest
+import com.mangaproject.data.model.ChapterByIdResponse
+import com.mangaproject.data.model.ChaptersByMangaResponse
 import com.mangaproject.data.model.CreateMangaRequest
 import com.mangaproject.data.model.FavoriteResponse
-import com.mangaproject.data.model.Genre
 import com.mangaproject.data.model.GenreResponse
 import com.mangaproject.data.model.GenresResponse
 import com.mangaproject.data.model.Manga
@@ -18,7 +19,11 @@ import com.mangaproject.data.model.Store
 import com.mangaproject.data.model.StoresResponse
 import com.mangaproject.data.model.TopMangaResponse
 import com.mangaproject.data.model.UpdateUserRequest
+import com.mangaproject.data.model.UploadProfilePictureResponse
 import com.mangaproject.data.model.User
+import com.mangaproject.data.model.UserResponse
+import okhttp3.MultipartBody
+import retrofit2.Response
 import com.mangaproject.data.model.ReadingHistoryResponse
 import com.mangaproject.data.model.SingleReadingHistoryResponse
 import com.mangaproject.data.model.UpdateReadingHistoryRequest
@@ -27,8 +32,11 @@ import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.HTTP
+import retrofit2.http.Header
+import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.PUT
+import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -101,6 +109,12 @@ interface ApiService {
     @GET("/users")
     suspend fun getAllUsers(): List<User>
 
+
+    @GET("/users/{id}")
+    suspend fun getUser(
+        @Path("id") id: String
+    ): User
+
     @PUT("/users/{id}")
     suspend fun updateUser(
         @Path("id") id: String,
@@ -143,5 +157,26 @@ interface ApiService {
     // Socket.io rooms
     @GET("/socket/rooms")
     suspend fun getSocketRooms(): SocketRoomsResponse
+    @GET("/chapters/manga/{id}")
+    suspend fun getAllChapterById(
+        @Path("id") id: String
+    ): Response<ChaptersByMangaResponse>
+
+    @GET("/chapters/{id}")
+    suspend fun getChapterById(
+        @Path("id") id: String
+    ): Response<ChapterByIdResponse>
+
+
+    @Multipart
+    @POST("users/profile/picture")
+    suspend fun uploadProfilePicture(
+        @Part profilePicture: MultipartBody.Part,
+        @Header("Authorization") authorization: String?
+    ): Response<UploadProfilePictureResponse>
+
+    @DELETE("users/profile/picture")
+    suspend fun deleteProfilePicture(): Response<UserResponse>
+
 
 }

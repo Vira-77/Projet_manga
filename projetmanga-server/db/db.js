@@ -6,8 +6,7 @@ const Genre = require('../models/Genre');
 const Manga = require('../models/Manga');
 const Store = require('../models/Store');
 const Favorite = require('../models/Favorite');
-
-
+const Chapter = require('../models/Chapter')
 
 let db_uri = process.env.MONGO_URI;
 
@@ -43,7 +42,8 @@ async function addSampleData() {
             Genre.deleteMany({}),
             Manga.deleteMany({}),
             Store.deleteMany({}),
-            Favorite.deleteMany({})
+            Favorite.deleteMany({}),
+            Chapter.deleteMany({})
         ]);
         console.log('Collections vidées');
 
@@ -112,7 +112,7 @@ async function addSampleData() {
             description: 'C’est un chat robot qui essaye de comprendre les humains mais il y arrive pas trop.',
             auteur: 'Tom Kenji',
             dateDeSortie: new Date('2020-03-12'),
-            urlImage: 'https://example.com/robocat.jpg',
+            urlImage: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSWyXOhW4UZTz7NLUUrCdQFGtwURtyIu52-DQ&s',
             genres: [shonen._id, fantasy._id],
             jikanId: null,
             source: 'local'
@@ -123,7 +123,7 @@ async function addSampleData() {
             description: 'Un garçon trouve une bulle magique qui parle. Ensemble ils vont dans plein de mondes bizarres.',
             auteur: 'Mina Yori',
             dateDeSortie: new Date('2018-06-04'),
-            urlImage: 'https://example.com/bubblequest.jpg',
+            urlImage: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSWyXOhW4UZTz7NLUUrCdQFGtwURtyIu52-DQ&s',
             genres: [shonen._id],
             jikanId: null,
             source: 'local'
@@ -134,7 +134,7 @@ async function addSampleData() {
             description: 'Un slime qui veut devenir chef cuisinier même si personne veut manger ce qu’il fait.',
             auteur: 'Riku Han',
             dateDeSortie: new Date('2021-11-22'),
-            urlImage: 'https://example.com/cookingslime.jpg',
+            urlImage: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSWyXOhW4UZTz7NLUUrCdQFGtwURtyIu52-DQ&s',
             genres: [shonen._id, fantasy._id],
             jikanId: null,
             source: 'local'
@@ -145,7 +145,7 @@ async function addSampleData() {
             description: 'Deux jeunes s’envoient des lettres qu’ils laissent sur la lune (oui c’est pas très logique).',
             auteur: 'Sora Miho',
             dateDeSortie: new Date('2019-09-10'),
-            urlImage: 'https://example.com/moonletters.jpg',
+            urlImage: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSWyXOhW4UZTz7NLUUrCdQFGtwURtyIu52-DQ&s',
             genres: [shojo._id],
             jikanId: null,
             source: 'local'
@@ -156,7 +156,7 @@ async function addSampleData() {
             description: 'Un mercenaire avec un bras en métal se bat contre des bandits mais il comprend jamais ce qu’ils veulent.',
             auteur: 'Akira Shidou',
             dateDeSortie: new Date('2014-01-17'),
-            urlImage: 'https://example.com/steelshadow.jpg',
+            urlImage: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSWyXOhW4UZTz7NLUUrCdQFGtwURtyIu52-DQ&s',
             genres: [seinen._id, fantasy._id],
             jikanId: null,
             source: 'local'
@@ -167,11 +167,63 @@ async function addSampleData() {
             description: 'Un petit club de volley qui perd tout le temps mais qui essaye quand même de faire mieux.',
             auteur: 'Yuto Kai',
             dateDeSortie: new Date('2017-05-30'),
-            urlImage: 'https://example.com/volleydreams.jpg',
+            urlImage: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSWyXOhW4UZTz7NLUUrCdQFGtwURtyIu52-DQ&s',
             genres: [shonen._id, sport._id],
             jikanId: null,
             source: 'local'
         });
+
+        const billyBat = await Manga.create({
+             nom: 'BillyBat',
+            description: `It's 1949, Japanese-American Kevin Yamagata is the author of the renowned detective comic book series "Billy Bat", after serving in the Allied Forces in World War II. As his series becomes a massive hit, Kevin discovers that his famed character Billy Bat already existed before within a Japanese manga. When learning that he may have unconsciously copied the character he saw during his occupation there, Kevin returns to Japan to find Billy Bat's original creator and seek permission from him to use their character. However, as he traces back Billy Bat's roots, he finds himself unraveling a dark twisted history of murders, bat sigils, conspiracy theories, and prophecies that somehow involve the character he thought he created.`,
+            auteur: 'Urasawa Naoki, Nagasaki Takashi',
+            dateDeSortie: new Date('2017-05-30'),
+            urlImage: '/uploads/mangas/billy_bat_cover.jpg',
+            genres: [shonen._id, sport._id],
+            jikanId: null,
+            source: 'local'
+        })
+
+
+        // ==========================
+        //   CHAPITRES POUR BillyBat
+        // ==========================
+        console.log('📖 Création des chapitres pour Robo Cat...');
+
+        const chapter1 = await Chapter.create({
+            titre: 'Chapitre 1 - L\'éveil du robot',
+            manga: billyBat._id,
+            chapterNumber: 1,
+            pages: [
+                { numero: 1, urlImage: '/uploads/chapters/billybat_1_1.jpeg' },
+                { numero: 2, urlImage: '/uploads/chapters/billybat_1_2.jpeg' },
+                { numero: 3, urlImage: '/uploads/chapters/billybat_1_3.jpeg' },
+                { numero: 4, urlImage: '/uploads/chapters/billybat_1_4.jpeg' },
+                { numero: 5, urlImage: '/uploads/chapters/billybat_1_5.jpeg' }
+            ]
+        });
+
+        const chapter2 = await Chapter.create({
+            titre: 'Chapitre 2 - Premier contact humain',
+            manga: billyBat._id,
+            chapterNumber: 2,
+            pages: [
+                { numero: 1, urlImage: 'https://example.com/robocat/ch2/page1.jpg' },
+                { numero: 2, urlImage: 'https://example.com/robocat/ch2/page2.jpg' },
+                { numero: 3, urlImage: 'https://example.com/robocat/ch2/page3.jpg' },
+                { numero: 4, urlImage: 'https://example.com/robocat/ch2/page4.jpg' }
+            ]
+        });
+
+          // ==========================
+        //   MISE À JOUR DES MANGAS AVEC LEURS CHAPITRES
+        // ==========================
+        console.log(' Liaison des chapitres aux mangas...');
+
+        await Manga.findByIdAndUpdate(billyBat._id, {
+            chapitres: [chapter1._id, chapter2._id]
+        });
+    
 
         //lier les mangas aux genres
         console.log(' Mise à jour des genres avec les mangas...');

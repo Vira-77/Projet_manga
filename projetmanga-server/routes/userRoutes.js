@@ -4,10 +4,48 @@ const router = express.Router();
 // Importation des contrôleurs et middlewares
 const userController = require('../controllers/userController');
 const { verifyToken, authorizeRoles } = require('../middlewares/authMiddleware'); 
+const { upload } = require('../middlewares/upload');
+
+
+
+// Route pour uploader la photo de profil
+router.post(
+    '/profile/picture',
+    verifyToken,
+    authorizeRoles('admin', 'admin_manga', 'utilisateur'),
+    upload.single('profilePicture'), // 'profilePicture' = nom du champ
+    userController.uploadProfilePicture
+);
+
+// Route pour supprimer la photo de profil
+router.delete(
+    '/profile/picture',
+    verifyToken,
+    authorizeRoles('admin', 'admin_manga', 'utilisateur'),
+    userController.deleteProfilePicture
+);
+
+// Récupérer un utilisateur par ID
+router.get(
+    '/:id', 
+    verifyToken, 
+    authorizeRoles('admin','admin_manga','utilisateur'), 
+    userController.getUserByIdController
+);
+
+
+// Mettre à jour un utilisateur par ID
+router.put(
+    '/:id', 
+    verifyToken, 
+    authorizeRoles('admin','admin_manga','utilisateur'), 
+    userController.updateUserController
+);
+
 
 
 // ===================================
-// CRUD ADMINISTRATIF (pour les admins) //  pas forcément utile
+// CRUD ADMINISTRATIF (pour les admins) 
 // ===================================
 
 // Créer un utilisateur 
@@ -27,21 +65,6 @@ router.get(
     userController.getAllUsersController
 );
 
-// Récupérer un utilisateur par ID
-router.get(
-    '/:id', 
-    verifyToken, 
-    authorizeRoles('admin'), 
-    userController.getUserByIdController
-);
-
-// Mettre à jour un utilisateur par ID
-router.put(
-    '/:id', 
-    verifyToken, 
-    authorizeRoles('admin'), 
-    userController.updateUserController
-);
 
 // Supprimer un utilisateur par ID
 router.delete(

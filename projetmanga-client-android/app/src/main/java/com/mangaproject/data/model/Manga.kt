@@ -8,7 +8,7 @@ data class Manga(
     val nom: String,
     val description: String?,
     val dateDeSortie: String?,
-    val urlImage: String?,
+    val urlImage: String,
     val auteur: String,
     val genres: List<String>?,
     val jikanId: Int? = null,

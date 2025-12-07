@@ -36,6 +36,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.LaunchedEffect
 import com.mangaproject.data.repository.StoreRepository
 import com.mangaproject.screens.user.HomeViewModelFactory
+import com.mangaproject.screens.manga.ScreenChapterReader
+import com.mangaproject.screens.manga.ScreenMangaDetailCommunaute
+import com.mangaproject.data.repository.UserRepository
+
 
 @Composable
 fun AppNav(navController: NavHostController) {
@@ -141,6 +145,23 @@ fun AppNav(navController: NavHostController) {
             )
         }
 
+
+        // pour les mangas ne provenant pas de l'api
+        composable(
+            route = NavigationRoutes.MANGA_DETAIL_COMMUNAUTE,
+            arguments = listOf(navArgument("id") { type = NavType.StringType })
+        ) { backStackEntry ->
+
+            val mangaId = backStackEntry.arguments?.getString("id") ?: ""
+            ScreenMangaDetailCommunaute(
+                id = mangaId,
+                onBack = { navController.popBackStack() },
+                onChapterClick = { chapterId ->
+                    navController.navigate("chapterReader/$chapterId")
+                }
+            )
+        }
+
         // --------------------------
         // EDIT MANGA
         // --------------------------
@@ -173,6 +194,27 @@ fun AppNav(navController: NavHostController) {
             )
         }
 
+
+
+        composable(
+            route = "chapterReader/{chapterId}",
+            arguments = listOf(navArgument("chapterId") { type = NavType.StringType })
+        ) { backStackEntry ->
+
+            val chapterId = backStackEntry.arguments?.getString("chapterId") ?: ""
+
+            ScreenChapterReader(
+                chapterId = chapterId,
+                onBack = { navController.popBackStack() },
+                onNavigateToChapter = { newChapterId ->
+                    // Naviguer vers le nouveau chapitre
+                    navController.navigate("chapterReader/$newChapterId") {
+                        popUpTo("chapterReader/$chapterId") { inclusive = true }
+                    }
+                }
+            )
+        }
+
         // --------------------------
         // CHAT IA
         // --------------------------
@@ -192,9 +234,10 @@ fun AppNav(navController: NavHostController) {
             val api = remember { RetrofitInstance.apiService }
             val mangaRepo = remember { MangaRepository(api) }
             val storeRepo = remember { StoreRepository(api) }
+            val userRepo = remember { UserRepository(api) }
 
             val homeVm: HomeViewModel = viewModel(
-                factory = HomeViewModelFactory(mangaRepo, storeRepo, prefs)
+                factory = HomeViewModelFactory(mangaRepo, storeRepo, userRepo,prefs)
             )
 
             val locationVM: LocationViewModel = viewModel()

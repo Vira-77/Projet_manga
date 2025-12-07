@@ -1,5 +1,6 @@
 package com.mangaproject.screens.user
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -13,9 +14,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.mangaproject.data.model.Manga
+import com.mangaproject.utils.ImageUtils.toFullImageUrl
 
 @Composable
-fun ScreenCommunautes(vm: HomeViewModel, modifier: Modifier = Modifier) {
+fun ScreenCommunautes(vm: HomeViewModel, modifier: Modifier = Modifier, onMangaClick: (String) -> Unit ) {
 
     val localMangas by vm.localMangas.collectAsState()
 
@@ -45,19 +47,19 @@ fun ScreenCommunautes(vm: HomeViewModel, modifier: Modifier = Modifier) {
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(localMangas) { manga ->
-                CommunautesItem(manga, vm)
+                CommunautesItem(manga, vm,onMangaClick)
             }
         }
     }
 }
 
 @Composable
-fun CommunautesItem(manga: Manga, vm: HomeViewModel) {
+fun CommunautesItem(manga: Manga, vm: HomeViewModel, onMangaClick: (String) -> Unit ) {
     val isFavorite = vm.isFavorite(manga.id)
     
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(4.dp)
+        modifier = Modifier.fillMaxWidth().clickable { onMangaClick(manga.id) },
+        elevation = CardDefaults.cardElevation(4.dp),
     ) {
         Row(
             modifier = Modifier.padding(12.dp),
@@ -65,7 +67,7 @@ fun CommunautesItem(manga: Manga, vm: HomeViewModel) {
         ) {
 
             AsyncImage(
-                model = manga.urlImage,
+                model = manga.urlImage.toFullImageUrl(),
                 contentDescription = manga.nom,
                 modifier = Modifier.size(80.dp)
             )
