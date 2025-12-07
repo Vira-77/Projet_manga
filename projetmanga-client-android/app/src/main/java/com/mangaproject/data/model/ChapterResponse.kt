@@ -45,3 +45,16 @@ data class ChapterInfo(
     @SerializedName("titre")
     val titre: String
 )
+
+// DTO pour créer un chapitre
+data class CreateChapterRequest(
+    val titre: String?,
+    val manga: String, // ID du manga
+    val chapterNumber: Int,
+    val pages: List<PageData> = emptyList() // Vide au départ
+)
+
+data class PageData(
+    val numero: Int,
+    val urlImage: String
+)

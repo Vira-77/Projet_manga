@@ -15,6 +15,8 @@ import com.mangaproject.data.model.MangaUpdateRequest
 import com.mangaproject.data.model.SearchResponse
 import com.mangaproject.data.model.AiRequest
 import com.mangaproject.data.model.AiResponse
+import com.mangaproject.data.model.Chapter
+import com.mangaproject.data.model.CreateChapterRequest
 import com.mangaproject.data.model.Store
 import com.mangaproject.data.model.StoresResponse
 import com.mangaproject.data.model.TopMangaResponse
@@ -28,6 +30,7 @@ import com.mangaproject.data.model.ReadingHistoryResponse
 import com.mangaproject.data.model.SingleReadingHistoryResponse
 import com.mangaproject.data.model.UpdateReadingHistoryRequest
 import com.mangaproject.data.model.SocketRoomsResponse
+import okhttp3.RequestBody
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -157,7 +160,7 @@ interface ApiService {
     // Socket.io rooms
     @GET("/socket/rooms")
     suspend fun getSocketRooms(): SocketRoomsResponse
-    @GET("/chapters/manga/{id}")
+    @GET("/chapters/mangaDetail/{id}")
     suspend fun getAllChapterById(
         @Path("id") id: String
     ): Response<ChaptersByMangaResponse>
@@ -178,5 +181,30 @@ interface ApiService {
     @DELETE("users/profile/picture")
     suspend fun deleteProfilePicture(): Response<UserResponse>
 
+    // CHAPTERS
+
+    // ✅ CHANGER Map en RequestBody
+    @POST("chapters")
+    suspend fun createChapter(
+        @Body chapterData: RequestBody
+    ): Chapter
+
+    @Multipart
+    @POST("chapters/{chapterId}/pages")
+    suspend fun addPageToChapter(
+        @Path("chapterId") chapterId: String,
+        @Part image: MultipartBody.Part,
+        @Part("numero") numero: RequestBody
+    )
+
+    @GET("chapters/manga/{mangaId}")
+    suspend fun getChaptersByManga(
+        @Path("mangaId") mangaId: String
+    ): List<Chapter>
+
+    @DELETE("chapters/{id}")
+    suspend fun deleteChapter(
+        @Path("id") chapterId: String
+    )
 
 }

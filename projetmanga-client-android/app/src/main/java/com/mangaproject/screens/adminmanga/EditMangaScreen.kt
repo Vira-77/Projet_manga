@@ -3,6 +3,7 @@ package com.mangaproject.screens.adminmanga
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -10,13 +11,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.mangaproject.data.model.Genre
+import com.mangaproject.utils.ImageUtils.toFullImageUrl
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditMangaScreen(
     mangaId: String,
     vm: EditMangaViewModel,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onNavigateToCreateChapter: (String) -> Unit
 ) {
     val loading by vm.loading.collectAsState()
     val error by vm.error.collectAsState()
@@ -96,7 +99,7 @@ fun EditMangaScreen(
             // IMAGE
             item {
                 AsyncImage(
-                    model = imageUrl,
+                    model = imageUrl.toFullImageUrl(),
                     contentDescription = nom,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -212,6 +215,27 @@ fun EditMangaScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(if (loading) "Mise à jour..." else "Enregistrer")
+                }
+            }
+            item {
+                Button(
+                    onClick = {
+                        // Navigation vers l'écran de création de chapitre
+                            onNavigateToCreateChapter(mangaId)
+                    },
+                    enabled = !loading,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add, // Ajouter import si nécessaire
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text("Ajouter un chapitre")
                 }
             }
 

@@ -1,5 +1,7 @@
 package com.mangaproject.ui.navigation
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -34,6 +36,7 @@ import com.mangaproject.screens.user.HomeViewModel
 import androidx.compose.material3.*
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Modifier
 import com.mangaproject.data.repository.StoreRepository
 import com.mangaproject.screens.user.HomeViewModelFactory
 import com.mangaproject.screens.manga.ScreenChapterReader
@@ -43,6 +46,9 @@ import com.mangaproject.data.repository.ReadingHistoryRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import com.mangaproject.screens.adminmanga.CreateChapterViewModel
+import com.mangaproject.screens.adminmanga.CreateChapterViewModelFactory
+import com.mangaproject.screens.adminmanga.ScreenCreateChapter
 
 
 @Composable
@@ -192,6 +198,44 @@ fun AppNav(navController: NavHostController) {
             )
 
             EditMangaScreen(
+                mangaId = mangaId,
+                vm = vm,
+                onBack = { navController.popBackStack() },
+                onNavigateToCreateChapter = { id ->
+                    navController.navigate("create_chapter/$id")
+                }
+            )
+        }
+
+        composable(
+            route = "create_chapter/{mangaId}",
+            arguments = listOf(navArgument("mangaId") { type = NavType.StringType })
+        ) { backStackEntry ->
+
+            val mangaId = backStackEntry.arguments?.getString("mangaId") ?: ""
+
+            val token by prefs.token.collectAsState(initial = "")
+
+            if (token.isBlank()) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = androidx.compose.ui.Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+                return@composable
+            }
+
+            val api = remember(token) { RetrofitInstance.authedApiService(token) }
+            val chapterRepo = remember(api) {
+                com.mangaproject.data.repository.ChapterRepository(api)
+            }
+
+            val vm: CreateChapterViewModel = viewModel(
+                factory = CreateChapterViewModelFactory(chapterRepo)
+            )
+
+            ScreenCreateChapter(
                 mangaId = mangaId,
                 vm = vm,
                 onBack = { navController.popBackStack() }

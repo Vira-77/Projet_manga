@@ -4,6 +4,7 @@ const router = express.Router();
 // Importation des contrôleurs et middlewares
 const chapterController = require('../controllers/chapterController');
 const { verifyToken, authorizeRoles } = require('../middlewares/authMiddleware'); 
+const { uploadChapterPage } = require('../middlewares/upload'); // ✅ AJOUTER
 
 // ==========================
 //   ROUTES PUBLIQUES
@@ -14,6 +15,9 @@ router.get('/', chapterController.getAllChapters);
 
 // Récupérer les chapitres d'un manga
 router.get('/manga/:mangaId', chapterController.getChaptersByManga);
+
+// Récupérer les chapitres d'un manga
+router.get('/mangaDetail/:mangaId', chapterController.getChaptersByMangaAffichageDetail);
 
 // Récupérer un chapitre par ID (avec pages par défaut)
 router.get('/:id', chapterController.getChapterById);
@@ -50,11 +54,12 @@ router.delete(
 //   GESTION DES PAGES
 // ==========================
 
-// Ajouter une page à un chapitre
+// ✅ Ajouter une page à un chapitre (AVEC UPLOAD)
 router.post(
     '/:chapterId/pages', 
     verifyToken, 
-    authorizeRoles('admin', 'admin_manga'), 
+    authorizeRoles('admin', 'admin_manga'),
+    uploadChapterPage.single('image'), // ✅ AJOUTER le middleware multer
     chapterController.addPageToChapter
 );
 
