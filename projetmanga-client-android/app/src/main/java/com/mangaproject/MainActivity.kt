@@ -1,6 +1,7 @@
 package com.mangaproject
 
 import android.Manifest
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -20,12 +21,21 @@ class MainActivity : ComponentActivity() {
     private lateinit var socketService: SocketService
     private lateinit var notificationService: NotificationService
 
-    private val requestPermissionLauncher =
+    // Launcher pour les permissions de géolocalisation
+    private val requestLocationPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
             // Juste pour debug
             permissions.forEach {
-                println(" Permission ${it.key} = ${it.value}")
+                println(" Permission géolocalisation ${it.key} = ${it.value}")
             }
+            // Après la géolocalisation, demander les notifications
+            requestNotificationPermission()
+        }
+
+    // Launcher pour les permissions de notifications
+    private val requestNotificationPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+            println(" Permission notifications POST_NOTIFICATIONS = $isGranted")
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,13 +48,8 @@ class MainActivity : ComponentActivity() {
         // Configurer les callbacks de notifications
         setupNotificationCallbacks()
 
-
-        requestPermissionLauncher.launch(
-            arrayOf(
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            )
-        )
+        // Demander d'abord les permissions de géolocalisation
+        requestLocationPermission()
 
         setContent {
             val context = LocalContext.current
@@ -62,6 +67,22 @@ class MainActivity : ComponentActivity() {
             }
 
             AppNav(navController)
+        }
+    }
+
+    private fun requestLocationPermission() {
+        requestLocationPermissionLauncher.launch(
+            arrayOf(
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            )
+        )
+    }
+
+    private fun requestNotificationPermission() {
+        // POST_NOTIFICATIONS est requis uniquement pour Android 13+ (API 33+)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            requestNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
     }
 
