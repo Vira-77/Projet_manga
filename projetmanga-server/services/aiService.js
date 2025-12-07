@@ -1,10 +1,17 @@
 const axios = require("axios");
 const { loadCatalogue } = require("./catalogueService");
 
-let history = [];
+// Historique par utilisateur
+const userHistories = {};
 
-async function chatWithAI(userMessage) {
+async function chatWithAI(userMessage, userId = "default") {
     const catalogue = await loadCatalogue();
+
+    // Récupérer ou créer l'historique pour cet utilisateur
+    if (!userHistories[userId]) {
+        userHistories[userId] = [];
+    }
+    const history = userHistories[userId];
 
     // Sécurisation des genres même si ce sont des ObjectId non populés
     const formattedCatalogue = catalogue

@@ -41,6 +41,7 @@ class SocketService private constructor(private val context: Context) {
     var onNewChapter: ((mangaId: String, chapter: JSONObject) -> Unit)? = null
     var onChapterUpdated: ((mangaId: String, chapter: JSONObject) -> Unit)? = null
     var onMangaStatus: ((mangaId: String, status: JSONObject) -> Unit)? = null
+    var onAIResponse: ((messageId: String, response: String) -> Unit)? = null
     
     /**
      * Connecte au serveur Socket.io et rejoint les rooms appropriées
@@ -131,6 +132,17 @@ class SocketService private constructor(private val context: Context) {
                     val mangaId = data.getString("mangaId")
                     Log.d(TAG, "Statut manga mis à jour: $mangaId")
                     onMangaStatus?.invoke(mangaId, data)
+                }
+            }
+            
+            // Écouter les réponses IA
+            socket?.on("ai:response") { args ->
+                val data = args[0] as? JSONObject
+                if (data != null) {
+                    val messageId = data.optString("messageId", "")
+                    val response = data.optString("response", "")
+                    Log.d(TAG, "Réponse IA reçue pour message: $messageId")
+                    onAIResponse?.invoke(messageId, response)
                 }
             }
             

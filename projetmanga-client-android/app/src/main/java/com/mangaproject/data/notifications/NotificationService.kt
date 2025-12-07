@@ -21,6 +21,7 @@ class NotificationService(private val context: Context) {
         private const val NOTIFICATION_ID_NEW_CHAPTER = 1001
         private const val NOTIFICATION_ID_CHAPTER_UPDATED = 1002
         private const val NOTIFICATION_ID_MANGA_STATUS = 1003
+        private const val NOTIFICATION_ID_AI_RESPONSE = 1004
     }
     
     private val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -154,6 +155,40 @@ class NotificationService(private val context: Context) {
                 .build()
             
             notificationManager.notify(NOTIFICATION_ID_MANGA_STATUS, notification)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+    
+    /**
+     * Affiche une notification pour une réponse IA
+     */
+    fun showAIResponseNotification(response: String) {
+        try {
+            val intent = Intent(context, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                putExtra("action", "open_chat")
+            }
+            
+            val pendingIntent = PendingIntent.getActivity(
+                context,
+                0,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            
+            val notification = NotificationCompat.Builder(context, CHANNEL_ID)
+                .setSmallIcon(android.R.drawable.ic_dialog_info)
+                .setContentTitle("🤖 Réponse de l'IA")
+                .setContentText(response.take(100) + if (response.length > 100) "..." else "")
+                .setStyle(NotificationCompat.BigTextStyle()
+                    .bigText(response))
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true)
+                .build()
+            
+            notificationManager.notify(NOTIFICATION_ID_AI_RESPONSE, notification)
         } catch (e: Exception) {
             e.printStackTrace()
         }

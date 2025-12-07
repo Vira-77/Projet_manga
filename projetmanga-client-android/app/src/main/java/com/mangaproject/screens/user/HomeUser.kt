@@ -21,6 +21,7 @@ import com.mangaproject.data.repository.StoreRepository
 import com.mangaproject.ui.component.FloatingChatBubble
 import com.mangaproject.data.repository.UserRepository
 import com.mangaproject.ui.tabs.UserTab
+import com.mangaproject.screens.chat.ChatScreen
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -146,14 +147,20 @@ fun HomeUser(
             }
         }
         //LA bulle IA – maintenant au-dessus de tout
+        var showChat by remember { mutableStateOf(false) }
+        
         FloatingChatBubble(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(20.dp),
             onClick = {
-                navController.navigate("chat_screen")
+                showChat = true
             }
         )
+        
+        if (showChat) {
+            ChatScreen(onDismiss = { showChat = false })
+        }
     }
 }
 

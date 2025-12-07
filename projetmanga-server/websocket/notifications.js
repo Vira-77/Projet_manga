@@ -45,8 +45,27 @@ function notifyMangaStatus(mangaId, statusPayload) {
   }
 }
 
+// Notification: réponse IA prête
+function notifyAIResponse(userId, messageId, response) {
+  try {
+    const io = getIo();
+    const room = `user:${userId}`;
+
+    io.to(room).emit('ai:response', {
+      messageId,
+      response,
+      timestamp: new Date().toISOString(),
+    });
+    
+    console.log(`Notification IA envoyée à l'utilisateur ${userId} pour le message ${messageId}`);
+  } catch (err) {
+    console.error('Erreur émission notif réponse IA:', err.message);
+  }
+}
+
 module.exports = {
   notifyNewChapter,
   notifyChapterUpdated,
   notifyMangaStatus,
+  notifyAIResponse,
 };

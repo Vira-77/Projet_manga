@@ -98,6 +98,11 @@ class MainActivity : ComponentActivity() {
         socketService.onMangaStatus = { mangaId, status ->
             notificationService.showMangaStatusNotification(mangaId, status)
         }
+        
+        socketService.onAIResponse = { messageId, response ->
+            // Afficher une notification push pour la réponse IA
+            notificationService.showAIResponseNotification(response)
+        }
     }
 
     override fun onDestroy() {
