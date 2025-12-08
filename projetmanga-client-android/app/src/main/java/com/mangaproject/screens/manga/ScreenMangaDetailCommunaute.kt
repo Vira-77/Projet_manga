@@ -3,6 +3,7 @@ package com.mangaproject.screens.manga
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
@@ -18,6 +19,7 @@ import coil.compose.AsyncImage
 import com.mangaproject.data.api.RetrofitInstance
 import com.mangaproject.data.model.Manga
 import com.mangaproject.data.model.Chapter
+import com.mangaproject.data.model.Genre
 import com.mangaproject.utils.ImageUtils.toFullImageUrl
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -29,12 +31,15 @@ fun ScreenMangaDetailCommunaute(
 ) {
     var manga by remember { mutableStateOf<Manga?>(null) }
     var chapters by remember { mutableStateOf<List<Chapter>>(emptyList()) }
+    var genres by remember { mutableStateOf<List<Genre>>(emptyList()) }
+    var selectedGenreNames by remember { mutableStateOf<List<String>>(emptyList()) }
     var error by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(true) }
     var chaptersLoading by remember { mutableStateOf(false) }
 
     LaunchedEffect(id) {
         try {
+            // Charger le manga
             val mangaResponse = RetrofitInstance.apiService.getMangaLocalById(id)
             manga = mangaResponse.manga
 
@@ -43,6 +48,21 @@ fun ScreenMangaDetailCommunaute(
                 return@LaunchedEffect
             }
 
+            // Charger tous les genres disponibles
+            try {
+                genres = RetrofitInstance.apiService.getAllGenres().genres
+            } catch (e: Exception) {
+                // Si erreur, continuer sans les genres
+            }
+
+            // Mapper les IDs de genres du manga vers leurs noms
+            manga?.genres?.let { genreIds ->
+                selectedGenreNames = genreIds.mapNotNull { id ->
+                    genres.firstOrNull { it.id == id }?.name
+                }
+            }
+
+            // Charger les chapitres
             chaptersLoading = true
             try {
                 val chaptersResponse = RetrofitInstance.apiService.getAllChapterById(id)
@@ -130,18 +150,57 @@ fun ScreenMangaDetailCommunaute(
                 item {
                     Text(
                         text = m.nom,
-                        style = MaterialTheme.typography.headlineLarge
+                        style = MaterialTheme.typography.headlineLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                // Auteur
+                item {
+                    Text(
+                        text = "✍️ Auteur : ${m.auteur}",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
 
                 // Date de sortie
                 item {
-                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        m.dateDeSortie?.let { dateString ->
+                    m.dateDeSortie?.let { dateString ->
+                        Text(
+                            text = "🗓️ Date de sortie : ${dateString.take(10)}",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+                // Genres
+                if (selectedGenreNames.isNotEmpty()) {
+                    item {
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
                             Text(
-                                text = "🗓️ Date de sortie : ${dateString.take(10)}",
-                                style = MaterialTheme.typography.bodyLarge
+                                text = "🏷️ Genres :",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Medium
                             )
+
+                            LazyRow(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                items(selectedGenreNames) { genreName ->
+                                    SuggestionChip(
+                                        onClick = { },
+                                        label = { Text(genreName) },
+                                        colors = SuggestionChipDefaults.suggestionChipColors(
+                                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                            labelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                        )
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -149,10 +208,29 @@ fun ScreenMangaDetailCommunaute(
                 // Description/Synopsis
                 m.description?.let {
                     item {
-                        Text("📖 Résumé :", style = MaterialTheme.typography.titleMedium)
-                        Spacer(Modifier.height(4.dp))
-                        Text(it, style = MaterialTheme.typography.bodyMedium)
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Text(
+                                text = "📖 Résumé :",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Text(
+                                text = it,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
+                }
+
+                // Divider avant les chapitres
+                item {
+                    HorizontalDivider(
+                        modifier = Modifier.padding(vertical = 8.dp),
+                        color = MaterialTheme.colorScheme.outlineVariant
+                    )
                 }
 
                 // SECTION CHAPITRES

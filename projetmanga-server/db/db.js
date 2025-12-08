@@ -175,7 +175,9 @@ async function addSampleData() {
 
         const billyBat = await Manga.create({
              nom: 'BillyBat',
-            description: `It's 1949, Japanese-American Kevin Yamagata is the author of the renowned detective comic book series "Billy Bat", after serving in the Allied Forces in World War II. As his series becomes a massive hit, Kevin discovers that his famed character Billy Bat already existed before within a Japanese manga. When learning that he may have unconsciously copied the character he saw during his occupation there, Kevin returns to Japan to find Billy Bat's original creator and seek permission from him to use their character. However, as he traces back Billy Bat's roots, he finds himself unraveling a dark twisted history of murders, bat sigils, conspiracy theories, and prophecies that somehow involve the character he thought he created.`,
+            description: `En 1949 aux États-Unis, Kevin Yamagata, né en Californie en 1920 de parents japonais immigrés, est un dessinateur de comics dont la série phare, Billy Bat, remporte un grand succès.
+Lorsqu'un policier lui indique par hasard que son héros, une chauve-souris détective, ressemble fortement à celui d'un manga japonais, Kevin interrompt la publication de sa série et se rend au Japon demander la permission au créateur original d'utiliser ce personnage pour sa bande dessinée.
+Dans le Japon occupé d'après-guerre, Yamagata se retrouve alors au cœur d'une affaire de meurtres et de complots… `,
             auteur: 'Urasawa Naoki, Nagasaki Takashi',
             dateDeSortie: new Date('2017-05-30'),
             urlImage: '/uploads/mangas/billy_bat_cover.jpg',
@@ -208,10 +210,10 @@ async function addSampleData() {
             manga: billyBat._id,
             chapterNumber: 2,
             pages: [
-                { numero: 1, urlImage: 'https://example.com/robocat/ch2/page1.jpg' },
-                { numero: 2, urlImage: 'https://example.com/robocat/ch2/page2.jpg' },
-                { numero: 3, urlImage: 'https://example.com/robocat/ch2/page3.jpg' },
-                { numero: 4, urlImage: 'https://example.com/robocat/ch2/page4.jpg' }
+                { numero: 1, urlImage: '/uploads/chapters/billybat_2_1.jpeg' },
+                { numero: 2, urlImage: '/uploads/chapters/billybat_2_2.jpeg' },
+                { numero: 3, urlImage: '/uploads/chapters/billybat_2_3.jpeg' },
+                { numero: 4, urlImage: '/uploads/chapters/billybat_2_4.jpeg' }
             ]
         });
 
