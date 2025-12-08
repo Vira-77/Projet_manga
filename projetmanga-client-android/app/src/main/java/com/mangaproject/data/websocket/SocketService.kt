@@ -60,11 +60,27 @@ class SocketService private constructor(private val context: Context) {
             }
             
             // Obtenir les rooms à rejoindre
-            val apiService = RetrofitInstance.authedApiService(token)
-            val roomsResponse = apiService.getSocketRooms()
-            currentRooms = roomsResponse.rooms
-            
-            Log.d(TAG, "Rooms à rejoindre: $currentRooms")
+            try {
+                val apiService = RetrofitInstance.authedApiService(token)
+                Log.d(TAG, "Récupération des rooms depuis le serveur...")
+                val roomsResponse = apiService.getSocketRooms()
+                currentRooms = roomsResponse.rooms
+                
+                Log.d(TAG, "Rooms à rejoindre: $currentRooms (${currentRooms.size} rooms)")
+                if (currentRooms.isEmpty()) {
+                    Log.w(TAG, "⚠️ Aucune room trouvée! Vérifiez que vous avez des favoris avec source='local'")
+                }
+            } catch (e: retrofit2.HttpException) {
+                when (e.code()) {
+                    404 -> Log.e(TAG, "❌ Route /socket/rooms non trouvée (404). Vérifiez que le serveur a été redémarré.")
+                    401 -> Log.e(TAG, "❌ Token invalide ou expiré (401). Reconnectez-vous.")
+                    else -> Log.e(TAG, "❌ Erreur HTTP ${e.code()}: ${e.message()}")
+                }
+                currentRooms = emptyList()
+            } catch (e: Exception) {
+                Log.e(TAG, "Erreur récupération rooms: ${e.message}", e)
+                currentRooms = emptyList()
+            }
             
             // Configuration Socket.io
             val options = IO.Options().apply {
@@ -107,12 +123,21 @@ class SocketService private constructor(private val context: Context) {
             
             // Écouter les notifications
             socket?.on("chapter:new") { args ->
-                val data = args[0] as? JSONObject
-                if (data != null) {
-                    val mangaId = data.getString("mangaId")
-                    val chapter = data.getJSONObject("chapter")
-                    Log.d(TAG, "Nouveau chapitre pour manga: $mangaId")
-                    onNewChapter?.invoke(mangaId, chapter)
+                try {
+                    Log.d(TAG, "🔔 Événement 'chapter:new' reçu!")
+                    val data = args[0] as? JSONObject
+                    if (data != null) {
+                        val mangaId = data.getString("mangaId")
+                        val chapter = data.getJSONObject("chapter")
+                        Log.d(TAG, "✅ Nouveau chapitre pour manga: $mangaId")
+                        Log.d(TAG, "📖 Détails chapitre: ${chapter.toString()}")
+                        onNewChapter?.invoke(mangaId, chapter)
+                        Log.d(TAG, "✅ Callback onNewChapter appelé")
+                    } else {
+                        Log.e(TAG, "❌ Données invalides dans chapter:new")
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "❌ Erreur traitement notification chapter:new: ${e.message}", e)
                 }
             }
             
@@ -167,12 +192,54 @@ class SocketService private constructor(private val context: Context) {
     }
     
     /**
+     * Recharge les rooms depuis le serveur et rejoint les nouvelles rooms
+     */
+    suspend fun reloadRooms() {
+        try {
+            val token = userPreferences.token.first()
+            if (token.isBlank()) {
+                Log.e(TAG, "Token manquant, impossible de recharger les rooms")
+                return
+            }
+            
+            val apiService = RetrofitInstance.authedApiService(token)
+            val roomsResponse = apiService.getSocketRooms()
+            val newRooms = roomsResponse.rooms
+            
+            Log.d(TAG, "Rooms rechargées: $newRooms (anciennes: $currentRooms)")
+            
+            // Rejoindre les nouvelles rooms
+            if (isConnected && socket?.connected() == true) {
+                val roomsToJoin = newRooms.filter { it !in currentRooms }
+                if (roomsToJoin.isNotEmpty()) {
+                    socket?.emit("join", roomsToJoin)
+                    Log.d(TAG, "Rejoint ${roomsToJoin.size} nouvelles rooms: $roomsToJoin")
+                }
+                
+                // Quitter les rooms qui ne sont plus dans la liste
+                val roomsToLeave = currentRooms.filter { it !in newRooms }
+                if (roomsToLeave.isNotEmpty()) {
+                    socket?.emit("leave", roomsToLeave)
+                    Log.d(TAG, "Quitté ${roomsToLeave.size} rooms: $roomsToLeave")
+                }
+            }
+            
+            currentRooms = newRooms
+        } catch (e: Exception) {
+            Log.e(TAG, "Erreur rechargement rooms: ${e.message}")
+        }
+    }
+    
+    /**
      * Rejoint une nouvelle room (ex: après avoir ajouté un favori)
      */
     fun joinRoom(room: String) {
         if (isConnected && socket?.connected() == true) {
             socket?.emit("join", listOf(room))
             Log.d(TAG, "Rejoint la room: $room")
+            if (room !in currentRooms) {
+                currentRooms = currentRooms + room
+            }
         }
     }
     

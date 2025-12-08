@@ -53,8 +53,10 @@ class NotificationService(private val context: Context) {
      */
     fun showNewChapterNotification(mangaId: String, chapter: JSONObject) {
         try {
+            android.util.Log.d("NotificationService", "🔔 Affichage notification nouveau chapitre pour manga: $mangaId")
             val chapterTitle = chapter.optString("titre", "Nouveau chapitre")
             val mangaTitle = chapter.optString("mangaTitle", "Manga")
+            android.util.Log.d("NotificationService", "📖 Titre: $mangaTitle - $chapterTitle")
             
             val intent = Intent(context, MainActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK

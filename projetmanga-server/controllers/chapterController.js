@@ -2,6 +2,7 @@ const Chapter = require('../models/Chapter');
 const Manga = require('../models/Manga');
 const path = require('path');
 const fs = require('fs');
+const { notifyNewChapter, notifyChapterUpdated } = require('../websocket/notifications');
 
 // =============================
 // CRÉER UN CHAPITRE (sans pages)
@@ -33,6 +34,16 @@ exports.createChapter = async (req, res) => {
         );
 
         console.log('✅ Chapitre créé:', newChapter._id);
+        console.log('📢 Envoi notification pour manga:', manga.toString());
+
+        // Envoyer une notification aux utilisateurs qui suivent ce manga
+        try {
+            notifyNewChapter(manga.toString(), newChapter.toObject());
+            console.log('✅ Notification envoyée avec succès');
+        } catch (notifError) {
+            console.error('❌ Erreur envoi notification:', notifError);
+            // Ne pas bloquer la création du chapitre si la notification échoue
+        }
 
         res.status(201).json(newChapter);
     } catch (error) {
@@ -319,6 +330,9 @@ exports.updateChapter = async (req, res) => {
         if (!chapter) {
             return res.status(404).json({ message: 'Chapitre non trouvé' });
         }
+
+        // Envoyer une notification de mise à jour
+        notifyChapterUpdated(chapter.manga.toString(), chapter.toObject());
 
         res.json(chapter);
     } catch (error) {

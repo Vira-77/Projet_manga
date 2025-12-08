@@ -5,11 +5,19 @@ function notifyNewChapter(mangaId, chapter) {
   try {
     const io = getIo();
     const room = `manga:${mangaId}`;
+    
+    // Obtenir le nombre de clients dans la room
+    const socketsInRoom = io.sockets.adapter.rooms.get(room);
+    const clientCount = socketsInRoom ? socketsInRoom.size : 0;
+    
+    console.log(`[Notification] Envoi notification nouveau chapitre pour manga ${mangaId} dans room ${room} - ${clientCount} client(s) connecté(s)`);
 
     io.to(room).emit('chapter:new', {
       mangaId,
       chapter,
     });
+    
+    console.log(`[Notification] Notification envoyée avec succès`);
   } catch (err) {
     console.error('Erreur émission notif nouveau chapitre:', err.message);
   }
