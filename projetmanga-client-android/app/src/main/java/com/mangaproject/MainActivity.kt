@@ -6,15 +6,20 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.mangaproject.data.datastore.UserPreferences
 import com.mangaproject.data.notifications.NotificationService
 import com.mangaproject.data.websocket.SocketService
 import androidx.navigation.compose.rememberNavController
 import com.mangaproject.ui.navigation.AppNav
+import com.mangaproject.ui.theme.MyMangaProjectTheme
 
 class MainActivity : ComponentActivity() {
 
@@ -65,8 +70,14 @@ class MainActivity : ComponentActivity() {
                     socketService.disconnect()
                 }
             }
-
-            AppNav(navController)
+            MyMangaProjectTheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    AppNav(navController)
+                }
+            }
         }
     }
 
